@@ -1,0 +1,48 @@
+<nav id="breadcrumb" aria-label="breadcrumb" hx-swap-oob="true">
+    <ol>
+      <li>
+        <span class="pointer" 
+            hx-target="#mainContent" 
+            hx-trigger="click" 
+            hx-get="./fragments/hxDatabases.html" 
+            hx-swap="innerHTML">HOME</span>
+      </li>
+      <li><mark>TABLES</mark></li>
+    </ol>
+</nav>
+
+<aside id="sideBar" aria-label="breadcrumb" hx-swap-oob="true">
+    <nav>
+        <ul>
+            <li>
+                <span class="pointer p-1" 
+                    data-target="universalModal" 
+                    onclick="toggleModal(event)"
+                    data-title="NEW TABLE"
+                    data-buttonaction="newTable"
+                    data-caption="SAVE"
+                    hx-target="#modalContent" 
+                    hx-trigger="click" 
+                    hx-get="fragments/hxProfile.html" 
+                    hx-swap="innerHTML">
+                    <i class="bx bx-plus"></i>
+                    NEW TABLE
+                </span>
+            </li>
+        </ul>
+    </nav>
+</aside>
+
+<div>
+    <article>
+        <header class="bg-primary">TABLES FOR <em><span id="holdDatabaseAlias"></span></em></header>
+        <section id="tablesContainer">
+            <aside>
+                <nav>
+                    <ul id="tablesList"></ul>
+                </nav>
+            </aside>
+        </section>
+        <footer></footer>
+    </article>
+</div>

@@ -1,0 +1,87 @@
+<nav id="breadcrumb" aria-label="breadcrumb" hx-swap-oob="true">
+    <ol>
+        <li>
+            <span class="pointer" 
+                hx-target="#mainContent" 
+                hx-trigger="click" 
+                hx-get="./fragments/hxDatabases.html" 
+                hx-swap="innerHTML">HOME</span>
+        </li>
+        <li>
+            <span class="pointer" 
+                hx-target="#mainContent" 
+                hx-trigger="click" 
+                hx-get="./fragments/hxTables.html" 
+                hx-swap="innerHTML">TABLES</span>
+        </li>
+        <li>
+            <mark class="pointer" 
+                hx-target="#mainContent" 
+                hx-trigger="click" 
+                hx-get="./fragments/hxFields.html" 
+                hx-swap="innerHTML">FIELDS</mark>
+        </li>
+    </ol>
+</nav>
+
+<aside id="sideBar" aria-label="breadcrumb" hx-swap-oob="true">
+    <nav>
+        <ul>
+            <li>
+                <span class="pointer p-1" 
+                    hx-target="#mainContent" 
+                    hx-trigger="click" 
+                    hx-get="./fragments/hxViewData.html" 
+                    hx-swap="innerHTML">
+                    <i class="bx bx-grid"></i>
+                    VIEW DATA 
+                </span>
+            </li>
+            <li>
+                <span id="newRecordButton"
+                    class="pointer p-1" 
+                    data-target="universalModal" 
+                    onclick="toggleModal(event)"
+                    data-title="NEW RECORD"
+                    data-buttonaction="saveRecord"
+                    data-caption="SAVE"
+                    hx-target="#modalContent" 
+                    hx-trigger="click" 
+                    hx-get="./fragments/hxRecord.html" 
+                    hx-swap="innerHTML" >
+                    <i class="bx bx-pencil"></i>
+                    NEW RECORD 
+                </span>
+            </li>
+            <li>
+                <span class="pointer p-1" 
+                    data-target="universalModal" 
+                    onclick="toggleModal(event)"
+                    data-title="NEW FIELD"
+                    data-buttonaction="newField"
+                    data-caption="SAVE"
+                    hx-target="#modalContent" 
+                    hx-trigger="click" 
+                    hx-get="./fragments/hxProfile.html" 
+                    hx-swap="innerHTML">
+                    <i class="bx bx-plus"></i>
+                    NEW FIELD
+                </span>
+            </li>
+        </ul>
+    </nav>
+</aside>
+
+<div>
+    <article>
+        <header class="bg-primary">FIELDS FOR <em><span id="holdTableAlias"></span></em></header>
+        <section id="fieldsContainer">
+            <aside>
+                <nav>
+                    <ul id="fieldsList"></ul>
+                </nav>
+            </aside>
+        </section>
+        <footer></footer>
+    </article>
+</div>

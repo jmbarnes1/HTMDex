@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="shortcut icon" href="#">
+    <link rel="stylesheet" href="./css/styles.css">
+    <link rel="stylesheet" href="./css/pico.min.css">
+    <link rel="stylesheet" href="./css/boxicons.min.css">
+
+    <script src="./modules/modal.js" defer></script>
+    
+    <script src="../library/htmx/htmx.2.0/htmx.min.js" defer></script>
+    <script src="./modules/dexie.js"></script>
+    <script src="./modules/htmxhandler.js" type="module" defer></script>
+    <script src="app.js" type="module"></script>
+
+    <title>012</title>
+</head>
+
+<body class="container">
+    <header>
+        <nav id="breadcrumb" aria-label="breadcrumb"></nav>
+    </header>
+    <main id="mainSection" class="standardGrid">
+        <div id="mainContent" 
+            class="table-responsive"
+            hx-target="#mainContent" 
+            hx-trigger="load" 
+            hx-get="./fragments/hxDatabases.html" 
+            hx-swap="innerHTML"></div>
+        <div>
+            <aside>
+                <nav id="sideBar"></nav>
+            </aside>
+        </div>
+    </main>
+    <footer></footer>
+
+    <dialog id="universalModal">
+        <article style="max-height: 90%; display: flex; flex-direction: column;">
+            <header class="bg-primary">
+                <span id="modalTitle" class="h3">DEFAULT TITLE</span>
+                <button id="closeModalButton"
+                    aria-label="Close"
+                    rel="prev"
+                    data-target="universalModal"
+                    onclick="toggleModal(event)"></button>
+            </header>
+            <div id="modalContent" style="overflow-y: auto; flex-grow: 1;">
+            </div>
+            <footer>
+                <button id="modalButton"
+                    role="button"
+                    class="secondary p-1"
+                    data-target="universalModal"
+                    data-action="">CLOSE</button>
+            </footer>
+        </article>
+    </dialog>
+</body>
+</html>

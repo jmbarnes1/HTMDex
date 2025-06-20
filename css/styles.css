@@ -1,0 +1,67 @@
+.pointer {cursor: pointer;}
+.standardGrid {display:grid; grid-template-columns: 5fr 1fr;padding: 5px;gap: 10px;}
+
+aside nav ul li {border: 2px solid rgb(224, 221, 221); border-radius: 5px; margin: 4px;}
+
+.alert {
+    padding: 1rem; 
+    border-radius: 5px; }
+
+.alert-warning {
+    background-color: #f7d265;
+    color: black; }
+
+.table-responsive {
+    overflow-x: auto;
+    width: 100%; }
+
+.bg-primary { background-color: #0d6efd !important; color: white !important; }
+.bg-secondary { background-color: #6c757d !important; color: white !important; }
+.bg-success { background-color: #198754 !important; color: white !important; }
+.bg-info { background-color: #0dcaf0 !important; color: black !important; }
+.bg-warning { background-color: #f7d265 !important; color: black !important; }
+.bg-danger { background-color: #dc3545 !important; color: white !important; }
+.bg-light { background-color: #f8f9fa !important; color: black !important; }
+.bg-dark { background-color: #212529 !important; color: white !important; }
+
+
+.text-primary { color: #0d6efd !important; }
+.text-secondary { color: #6c757d !important; }
+.text-success { color: #198754 !important; }
+.text-info { color: #0dcaf0 !important; }
+.text-warning { color: #f7d265 !important; }
+.text-danger { color: #dc3545 !important; }
+.text-light { color: #f8f9fa !important; }
+.text-dark { color: #212529 !important; }
+.text-center { text-align: center; }
+
+
+.border { border: 1px solid #dee2e6 !important; }
+.border-0 { border: none !important; }
+.border-primary { border: 1px solid #0d6efd !important; }
+.border-success { border: 1px solid #198754 !important; }
+.border-danger { border: 1px solid #dc3545 !important; }
+.border-warning { border: 1px solid #f7d265 !important; }
+.border-dark { border: 1px solid #212529 !important; }
+
+.p-0 { padding: 0.0rem !important; }
+.p-1 { padding: 0.25rem !important; }
+.p-2 { padding: 0.5rem !important; }
+.p-3 { padding: 1rem !important; }
+.p-4 { padding: 1.5rem !important; }
+.p-5 { padding: 3rem !important; }
+.m-0 { margin: 0.0rem !important; }
+.m-1 { margin: 0.25rem !important; }
+.m-2 { margin: 0.5rem !important; }
+.m-3 { margin: 1rem !important; }
+.m-4 { margin: 1.5rem !important; }
+.m-5 { margin: 3rem !important; }
+
+.ps-0 { padding-left: 0.0rem !important; }
+.ps-1 { padding-left: 0.25rem !important; }
+
+.float-end {float: right !important;}
+
+input:read-only {
+    background-color: rgb(238, 229, 187);
+    border: 0; }

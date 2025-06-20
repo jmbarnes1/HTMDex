@@ -1,0 +1,37 @@
+<pre>
+Dexie:  https://dexie.org/
+Box Icons:  https://boxicons.com/
+PicoCSS:  https://picocss.com/
+
+indexedDB.deleteDatabase("dexieDatabaseRegistry");
+const fieldRegistry = await dexieDatabaseRegistry
+    .fieldRegistry.where("tableRecordKey")
+    .equals(actionElement.dataset.databaserecordkey);
+
+
+// Modify the databaseName property.
+record.databaseName = newDatabaseName; // Set the new value.
+// Save the updated record.
+return dexieDatabaseRegistry.databaseRegistry.put(record);    
+
+
+// For each does NOT work with await.
+for (const table of tableArray) {
+    console.log(table.id);
+
+    const fieldArray = await dexieDatabaseRegistry
+        .fieldRegistry
+        .where("tableRecordKey")
+        .equals(table.id)
+        .toArray();
+
+    console.log(fieldArray);
+
+    for (const field of fieldArray) {
+        console.log(field.id);
+        dexieDatabaseRegistry.table('fieldRegistry').delete(Number(field.id));
+    }
+}
+
+
+</pre>

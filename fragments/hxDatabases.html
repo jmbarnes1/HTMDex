@@ -1,0 +1,47 @@
+<aside id="sideBar" aria-label="breadcrumb" hx-swap-oob="true" data-oob="true">
+    <nav>
+        <ul>
+            <li>
+                <span class="pointer p-1" 
+                    data-target="universalModal" 
+                    onclick="toggleModal(event)"
+                    data-title="NEW DATABASE"
+                    data-buttonaction="newDatabase"
+                    data-caption="SAVE"
+                    hx-target="#modalContent" 
+                    hx-trigger="click" 
+                    hx-get="fragments/hxProfile.html" 
+                    hx-swap="innerHTML">
+                    <i class="bx bx-plus"></i>
+                    NEW DATABASE
+                </span>
+            </li>
+        </ul>
+    </nav>
+</aside>
+
+<nav id="breadcrumb" aria-label="breadcrumb"  hx-swap-oob="true">
+    <ol>
+      <li>
+        <span class="pointer" 
+            hx-target="#mainContent" 
+            hx-trigger="click" 
+            hx-get="./fragments/hxDatabases.html" 
+            hx-swap="innerHTML">HOME</span>
+      </li>
+    </ol>
+</nav>
+
+<div>
+    <article>
+        <header class="bg-primary">DATABASES</header>
+        <section id="databasesContainer">
+            <aside>
+                <nav>
+                    <ul id="databaseList"></ul>
+                </nav>
+            </aside>
+        </section>
+        <footer></footer>
+    </article>
+</div>
