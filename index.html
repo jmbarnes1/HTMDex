@@ -7,6 +7,7 @@
     <link rel="shortcut icon" href="#">
     <link rel="stylesheet" href="./css/styles.css">
     <link rel="stylesheet" href="./css/pico.min.css">
+    <link rel="stylesheet" href="./css/pico.colors.min.css">
     <link rel="stylesheet" href="./css/boxicons.min.css">
 
     <script src="./modules/modal.js" defer></script>
@@ -16,7 +17,7 @@
     <script src="./modules/htmxhandler.js" type="module" defer></script>
     <script src="app.js" type="module"></script>
 
-    <title>012</title>
+    <title>HTMDex</title>
 </head>
 
 <body class="container">
@@ -29,7 +30,9 @@
             hx-target="#mainContent" 
             hx-trigger="load" 
             hx-get="./fragments/hxDatabases.html" 
-            hx-swap="innerHTML"></div>
+            hx-swap="innerHTML" 
+            hx-push-url="index.html">
+        </div>
         <div>
             <aside>
                 <nav id="sideBar"></nav>

@@ -1,15 +1,13 @@
-//import { focusAndSelectElement, userConfirm, createLogger, getReferrerParams } from "./utils.js";
+import { getParams } from "./utils.js";
 
 async function handleDatabases() {
-        
-    console.log("dexieDatabaseRegistry.databaseRegistry: ", dexieDatabaseRegistry.databaseRegistry);
+
+    consoleCustomLog("\n\n**********\nThe fragment hxDatabases.html has been loaded.");
 
     const databaseList = document.getElementById("databaseList");
-    
+
     // Clean up.
     databaseList.innerHTML = "";
-    
-    console.log("databaseList 1:  ",databaseList)
     
     //Loop over entries.
     dexieDatabaseRegistry.databaseRegistry.each ( databaseDocument => {
@@ -81,15 +79,16 @@ async function handleTables()
 
     consoleCustomLog("\n\n**********\nThe fragment hxTables.html has been loaded.");
     
-    let searchParams = new URLSearchParams(window.location.search); 
-    
+    // Get params from the URL.
+    const params = getParams();
+
     // Get database information.
-    let databaseRecordKey = Number(searchParams.get('databaseRecordKey')); 
-    let databaseRecord = await dexieDatabaseRegistry.databaseRegistry.get(databaseRecordKey)
-    let databaseAlias = databaseRecord.databaseAlias;
+    const databaseRecordKey = params.databaseRecordKey;
+    const databaseRecord = await dexieDatabaseRegistry.databaseRegistry.get(databaseRecordKey)
+    const databaseAlias = databaseRecord.databaseAlias;
 
     // Get tables.
-    let tableRegistry =  await dexieDatabaseRegistry.tableRegistry.where("databaseRecordKey").equals(databaseRecordKey).sortBy('tableName');
+    const tableRegistry =  await dexieDatabaseRegistry.tableRegistry.where("databaseRecordKey").equals(databaseRecordKey).sortBy('tableName');
 
     // Display the name of the database.
     document.getElementById("holdDatabaseAlias").textContent = databaseAlias;
@@ -101,8 +100,8 @@ async function handleTables()
         const tableListItem = document.createElement("li");
 
         const tableNameSpan = document.createElement("span");
-        tableNameSpan.setAttribute("hx-get", "./fragments/hxFields.html");
-        //tableNameSpan.setAttribute("hx-get", "./fragments/hxViewData.html");
+        //tableNameSpan.setAttribute("hx-get", "./fragments/hxFields.html");
+        tableNameSpan.setAttribute("hx-get", "./fragments/hxViewData.html");
         tableNameSpan.setAttribute("hx-target", "#mainContent");
         tableNameSpan.setAttribute("hx-swap", "innerHTML");
         tableNameSpan.setAttribute("hx-trigger", "click");
@@ -154,29 +153,43 @@ async function handleFields() {
 
     consoleCustomLog("\n\n**********\nThe fragment hxFields.html has been loaded.");
 
-    let searchParams = new URLSearchParams(window.location.search);
-    let tableRecordKey = Number(searchParams.get('tableRecordKey'));
-    let databaseRecordKey = Number(searchParams.get('databaseRecordKey')); 
-
-    let newRecordButton = document.getElementById("newRecordButton");
-    newRecordButton.setAttribute("hx-push-url",`index.html?databaseRecordKey=${databaseRecordKey}&tableRecordKey=${tableRecordKey}`);
-    
+    // Get params from the URL.
+    const params = getParams();
+    const databaseRecordKey = params.databaseRecordKey;
+    const tableRecordKey = params.tableRecordKey;
+ 
     // Get all fields for the table.
-    let fieldRegistry = await dexieDatabaseRegistry.fieldRegistry.where("tableRecordKey").equals(tableRecordKey).sortBy('fieldName');
+    const fieldRegistry = await dexieDatabaseRegistry
+        .fieldRegistry
+        .where("tableRecordKey")
+        .equals(tableRecordKey)
+        .sortBy('fieldName');
 
-    let tableRecord = await dexieDatabaseRegistry.tableRegistry.get(tableRecordKey);
-    //let databaseRecord = await dexieDatabaseRegistry.databaseRegistry.get(databaseRecordKey);
-    //let databaseName = databaseRecord.databaseName;
+    const tableRecord = await dexieDatabaseRegistry.tableRegistry.get(tableRecordKey);
     const tableAlias = tableRecord.tableAlias;
 
     document.getElementById("holdTableAlias").textContent = tableAlias;
+    const fieldsList = document.getElementById("fieldsList");
+    
+    if (fieldRegistry.length === 0 ) {
+        
+        const warning = document.createElement("article");
+        warning.classList.add("pico-background-red-300","text-center");
+        warning.textContent = "NO FIELDS DEFINED YET!";
+        fieldsList.append (
+            warning
+        );
 
+        return
+    }
+
+    // Loop over fields and display them.
     fieldRegistry.forEach( function (field) {
         
         // List item to hold table information.
         const spanListItem = document.createElement("li");
 
-        // Span to hold actual attributes for HTMX
+        // Span to hold actual attributes for HTMX.
         const fieldNameSpan = document.createElement("span");
         fieldNameSpan.setAttribute("hx-get", "./fragments/hxFields.html");
         fieldNameSpan.setAttribute("hx-target", "#mainContent");
@@ -189,12 +202,14 @@ async function handleFields() {
         const fieldIcon = document.createElement("i");
         fieldIcon.classList.add("m-1","bx","bx-bracket");
 
+        // Icon for deleting a field.
         const trashIcon = document.createElement("i");
         trashIcon.classList.add("m-1","float-end","pointer","bx","bx-trash");
         trashIcon.setAttribute("data-action", "deleteField");
         trashIcon.setAttribute("data-fieldRecordKey", field.id);
         trashIcon.setAttribute("data-tableRecordKey", tableRecordKey);
 
+        // Icon for editing.
         const pencilIcon = document.createElement("i");
         pencilIcon.classList.add("m-1","float-end","pointer","bx","bx-edit");
         pencilIcon.setAttribute("data-fieldRecordKey", field.id);
@@ -228,24 +243,32 @@ async function handleViewData() {
 
     consoleCustomLog("\n\n**********\nThe fragment hxViewData.html has been loaded.\n");
 
-    let searchParams = new URLSearchParams(window.location.search);
-    let databaseRecordKey = Number(searchParams.get('databaseRecordKey'));
-    let tableRecordKey = Number(searchParams.get('tableRecordKey')); 
+    // Get params from the URL.
+    const params = getParams();
+    const databaseRecordKey = params.databaseRecordKey;
+    const tableRecordKey = params.tableRecordKey;
     
     // Get all fields for the table.
-    let fieldRegistry = await dexieDatabaseRegistry.fieldRegistry.where("tableRecordKey").equals(tableRecordKey).sortBy('fieldName');
+    const fieldRegistry = await dexieDatabaseRegistry.fieldRegistry.where("tableRecordKey").equals(tableRecordKey).sortBy('fieldName');
 
-    let tableRecord = await dexieDatabaseRegistry.tableRegistry.get(tableRecordKey);
-    let databaseRecord = await dexieDatabaseRegistry.databaseRegistry.get(tableRecord.databaseRecordKey);
+    const tableRecord = await dexieDatabaseRegistry.tableRegistry.get(tableRecordKey);
+    const databaseRecord = await dexieDatabaseRegistry.databaseRegistry.get(tableRecord.databaseRecordKey);
 
     document.getElementById("holdTableAlias").textContent = tableRecord.tableAlias;
 
-    consoleCustomLog("\n\ndatabase:  ",databaseRecord.databaseName,"\ntable:  ",tableRecord.tableName," \nfieldRegistry:  ", fieldRegistry);
+    consoleCustomLog (
+        "\nMetadata ",
+        "\n========",
+        "\ndatabase:  ",databaseRecord.databaseName,
+        "\ndatabasealias:",databaseRecord.databaseAlias,
+        "\ntable:  ",tableRecord.tableName,
+        "\ntablealias:  ",tableRecord.tableAlias,
+        "\nfieldRegistry:  ", fieldRegistry);
     
-    let fieldNames = fieldRegistry.map(f => f.fieldName);
-    let fieldListString = fieldNames.join(','); 
+    const fieldNames = fieldRegistry.map(f => f.fieldName);
+    const fieldListString = fieldNames.join(','); 
 
-    let db = new Dexie(databaseRecord.databaseName);
+    const db = new Dexie(databaseRecord.databaseName);
     db.version(1).stores({
         [tableRecord.tableName]: fieldListString
     });
@@ -255,7 +278,7 @@ async function handleViewData() {
     const data = await db.table(tableRecord.tableName).toArray();
 
     //Generate the table and add it to the DOM
-    let viewDataContainer = document.getElementById('viewDataContainer');
+    const viewDataContainer = document.getElementById('viewDataContainer');
 
     //Display the data.
     viewDataContainer.innerHTML = await createTableFromJSON(data,databaseRecordKey,tableRecordKey)
@@ -315,7 +338,6 @@ async function handleRecord() {
 
 
     // Loop over the field data and build a form element for each item.
-    //fieldList.forEach( function (field) {
     fieldRegistry.forEach( function (field) {
 
         const element = document.createElement("div");
@@ -337,25 +359,42 @@ async function handleRecord() {
     })
 }
 
- export function initHTMXHandler () {
-
-    document.body.addEventListener('htmx:oobAfterSwap', async (e) => {
-
-        //console.log("OOBSwap:  ", e)
-    })
+export function initHTMXHandler () {
 
     document.body.addEventListener('htmx:afterSwap', async (e) => {
 
+        // Get params from the URL.
+        const params = getParams();
+        const databaseRecordKey = params.databaseRecordKey;
+        const tableRecordKey = params.tableRecordKey;
+
+         // Get the fragment.
+        let fragment = e.detail.pathInfo.requestPath.split("/").at(-1);
+        fragment = fragment.split("?").at(0);       
+        
+
         // Don't use the router for OOB swaps. 
         if (e.detail.elt.getAttribute("hx-swap-oob") === "true") {
+            
+            // Handle the breadcrumb urls.
+            const databasesBreadCrumb = document.getElementById("databasesBreadCrumb");
+            if (databasesBreadCrumb) {
+                if (databaseRecordKey && databaseRecordKey != '') {
+                    databasesBreadCrumb.setAttribute("hx-push-url",`index.html?databaseRecordKey=${databaseRecordKey}`);
+                }
+            }
+
+            const tablesBreadCrumb = document.getElementById("tablesBreadCrumb");
+            if (databasesBreadCrumb) {
+                if ((tableRecordKey) && tableRecordKey != '') {
+                    tablesBreadCrumb.setAttribute("hx-push-url",`index.html?databaseRecordKey=${databaseRecordKey}&tableRecordKey=${tableRecordKey}`);
+                }
+            }
+            
             return
         }
 
-        // Get the fragment.
-        let fragment = e.detail.pathInfo.requestPath.split("/").at(-1);
-        fragment = fragment.split("?").at(0);
-
-        console.log("\nThe function initHTMXHandler will process the fragment:  ",fragment, e);
+        consoleCustomLog("\n\n**********\nThe fragment ", fragment.trim() ," is about to be processed by the HTMXHandler.");
 
         switch (fragment) {
             case 'hxDatabases.html' : 

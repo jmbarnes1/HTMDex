@@ -1,14 +1,17 @@
 <nav id="breadcrumb" aria-label="breadcrumb" hx-swap-oob="true">
     <ol>
         <li>
-            <span class="pointer" 
+            <span id="databasesBreadCrumb"
+                class="pointer" 
                 hx-target="#mainContent" 
                 hx-trigger="click" 
                 hx-get="./fragments/hxDatabases.html" 
+                hx-push-url="index.html"
                 hx-swap="innerHTML">HOME</span>
         </li>
         <li>
-            <span class="pointer" 
+            <span id="tablesBreadCrumb" 
+                class="pointer" 
                 hx-target="#mainContent" 
                 hx-trigger="click" 
                 hx-get="./fragments/hxTables.html" 
@@ -35,22 +38,6 @@
                     hx-swap="innerHTML">
                     <i class="bx bx-grid"></i>
                     VIEW DATA 
-                </span>
-            </li>
-            <li>
-                <span id="newRecordButton"
-                    class="pointer p-1" 
-                    data-target="universalModal" 
-                    onclick="toggleModal(event)"
-                    data-title="NEW RECORD"
-                    data-buttonaction="saveRecord"
-                    data-caption="SAVE"
-                    hx-target="#modalContent" 
-                    hx-trigger="click" 
-                    hx-get="./fragments/hxRecord.html" 
-                    hx-swap="innerHTML" >
-                    <i class="bx bx-pencil"></i>
-                    NEW RECORD 
                 </span>
             </li>
             <li>
