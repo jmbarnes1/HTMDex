@@ -284,6 +284,8 @@ async function handleViewData() {
     viewDataContainer.innerHTML = await createTableFromJSON(data,databaseRecordKey,tableRecordKey)
 
     htmx.process("#viewDataContainer");
+
+    db.close();
 }
 
 async function handleRecord() {

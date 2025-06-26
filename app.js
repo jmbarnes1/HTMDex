@@ -404,6 +404,7 @@ async function handleDeleteField (event, actionElement) {
 }
 
 
+
 async function handleSaveRecord (event, actionElement) {
 
     consoleCustomLog("\n\n**********\nThe function handleSaveRecord has been called.");
@@ -439,7 +440,6 @@ async function handleSaveRecord (event, actionElement) {
     //const fieldsArray = Object.keys(formDataObject).filter(f => f !== 'id');
     //const fieldsList = "++id,"+fieldsArray.join(",");
 
-
     const fields = await dexieDatabaseRegistry.fieldRegistry
         .where("tableRecordKey")
         .equals(tableRecordKey)
@@ -451,11 +451,22 @@ async function handleSaveRecord (event, actionElement) {
     // Open the database.
     const version = Number(tableRecord.schemaVersion || 1);
 
-    let db = await new Dexie(databaseRecord.databaseName);
+    //let db = await new Dexie(databaseRecord.databaseName);
     //db.version(version).stores({
-    db.version(1).stores({
-        [tableRecord.tableName] : fieldsList
-    });
+    //db.version(1).stores({
+    //    [tableRecord.tableName] : fieldsList
+    //});
+console.log("close");
+let db = new Dexie(databaseRecord.databaseName);
+console.log("1")
+db.close(); // ensure no lingering connections
+console.log("2")
+db.version(1).stores({
+    [tableRecord.tableName]: fieldsList
+});
+console.log("3:  ", fieldsList)
+await db.open();
+console.log("Open");
 
     // Get the primary key name.
     const primaryKey = db[tableRecord.tableName].schema.primKey.name;
@@ -471,7 +482,8 @@ async function handleSaveRecord (event, actionElement) {
         "\n========",
         "\ndatabase alias:  ",databaseRecord.databaseAlias,
         "\ndatabase name:  ",databaseRecord.databaseName,
-        "\ntable:  ",tableRecord.tableAlias,
+        "\ntable alias:  ",tableRecord.tableAlias,
+        "\ntable name:  ",tableRecord.tableName,
         "\nprimaryKey:  ", primaryKey,
         "\nhasKey:  ",hasKey,
         "\nfieldList:  ",fieldsList,
@@ -488,16 +500,16 @@ async function handleSaveRecord (event, actionElement) {
         delete formDataObject[primaryKey];
 
         const updated = await table.update(primaryKeyValue, formDataObject);
-        db.close();
+        
         consoleCustomLog(`Record with key ${primaryKey}:${primaryKeyValue} updated in the table ${tableRecord.tableAlias}.`);
     } else {
 
         // Insert without specifying key (auto-increment assumed).
-        console.log("await table.add(",formDataObject,");")
-        //const newKey = await table.add(formDataObject);
-        const newKey = await table.add({...formDataObject});
 
-        db.close();
+        const newKey = await table.add(formDataObject);
+        //const newKey = await table.add({...formDataObject});
+
+        //db.close();
         
         consoleCustomLog(`\nRecord inserted in to the table ${table} with generated key ${newKey}.`);
     }
