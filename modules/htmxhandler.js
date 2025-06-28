@@ -8,6 +8,21 @@ async function handleDatabases() {
 
     // Clean up.
     databaseList.innerHTML = "";
+
+    const dbCount = await dexieDatabaseRegistry.databaseRegistry.count();
+
+    console.log("count 1:  ",dbCount);
+    if (dbCount === 0) {
+        
+        const warning = document.createElement("article");
+        warning.classList.add("pico-background-red-300","text-center");
+        warning.textContent = "NO DATABASES DEFINED YET!";
+        databaseList.append (
+            warning
+        );
+
+        return
+    }
     
     //Loop over entries.
     dexieDatabaseRegistry.databaseRegistry.each ( databaseDocument => {
@@ -93,6 +108,20 @@ async function handleTables()
     // Display the name of the database.
     document.getElementById("holdDatabaseAlias").textContent = databaseAlias;
 
+    console.log(tableRegistry.length)
+    if (tableRegistry.length === 0) {
+        
+        const tablesList = document.getElementById("tablesList");
+        const warning = document.createElement("article");
+        warning.classList.add("pico-background-red-300","text-center");
+        warning.textContent = "NO TABLES DEFINED YET!";
+        tablesList.append (
+            warning
+        );
+
+        return
+    }
+
     // Output the schema of each table.
     tableRegistry.forEach( function (table) {
 
@@ -100,7 +129,6 @@ async function handleTables()
         const tableListItem = document.createElement("li");
 
         const tableNameSpan = document.createElement("span");
-        //tableNameSpan.setAttribute("hx-get", "./fragments/hxFields.html");
         tableNameSpan.setAttribute("hx-get", "./fragments/hxViewData.html");
         tableNameSpan.setAttribute("hx-target", "#mainContent");
         tableNameSpan.setAttribute("hx-swap", "innerHTML");
@@ -163,7 +191,8 @@ async function handleFields() {
         .fieldRegistry
         .where("tableRecordKey")
         .equals(tableRecordKey)
-        .sortBy('fieldName');
+        .toArray();
+        //.sortBy('fieldName');
 
     const tableRecord = await dexieDatabaseRegistry.tableRegistry.get(tableRecordKey);
     const tableAlias = tableRecord.tableAlias;
@@ -248,13 +277,17 @@ async function handleViewData() {
     const databaseRecordKey = params.databaseRecordKey;
     const tableRecordKey = params.tableRecordKey;
     
-    // Get all fields for the table.
+    // Get all fields for the table.  This is returned as an array.
     const fieldRegistry = await dexieDatabaseRegistry.fieldRegistry.where("tableRecordKey").equals(tableRecordKey).sortBy('fieldName');
-
     const tableRecord = await dexieDatabaseRegistry.tableRegistry.get(tableRecordKey);
     const databaseRecord = await dexieDatabaseRegistry.databaseRegistry.get(tableRecord.databaseRecordKey);
+    const version = Number(tableRecord.schemaVersion || 1);
 
     document.getElementById("holdTableAlias").textContent = tableRecord.tableAlias;
+    const newRecordButton = document.getElementById("newRecordButton");
+    if (newRecordButton !== null) {
+        newRecordButton.setAttribute("hx-push-url",`index.html?databaseRecordKey=${databaseRecordKey}&tableRecordKey=${tableRecordKey}`);
+    }
 
     consoleCustomLog (
         "\nMetadata ",
@@ -263,19 +296,27 @@ async function handleViewData() {
         "\ndatabasealias:",databaseRecord.databaseAlias,
         "\ntable:  ",tableRecord.tableName,
         "\ntablealias:  ",tableRecord.tableAlias,
-        "\nfieldRegistry:  ", fieldRegistry);
-    
-    const fieldNames = fieldRegistry.map(f => f.fieldName);
-    const fieldListString = fieldNames.join(','); 
+        "\nversion:  ",version,
+        "\nfieldRegistry:  ", fieldRegistry,
+        "\nfieldRegistryCount: ",fieldRegistry.length
+    );
 
-    const db = new Dexie(databaseRecord.databaseName);
-    db.version(1).stores({
-        [tableRecord.tableName]: fieldListString
-    });
+    let data = [];
+    if (fieldRegistry.length != 0) {
+        
+        let fieldNames = fieldRegistry.map(f => f.fieldName);
+        fieldNames.unshift("++id");
+        const fieldListString = fieldNames.join(','); 
 
-    await db.open();
+        const workingDB = new Dexie(databaseRecord.databaseName);
+            workingDB.version(version).stores({
+            [tableRecord.tableName]: fieldListString
+        });
 
-    const data = await db.table(tableRecord.tableName).toArray();
+        await workingDB.open();
+
+        data = await workingDB.table(tableRecord.tableName).toArray();
+    }
 
     //Generate the table and add it to the DOM
     const viewDataContainer = document.getElementById('viewDataContainer');
@@ -285,18 +326,25 @@ async function handleViewData() {
 
     htmx.process("#viewDataContainer");
 
-    db.close();
+    if (typeof workingDB != 'undefined') {
+        workingDB.close();
+    }
 }
 
 async function handleRecord() {
 
     consoleCustomLog("\n\n**********\nThe fragment hxRecord.html has been loaded.");
     
-    let searchParams = new URLSearchParams(window.location.search);
+    // Get params from the URL.
+    const params = getParams();
+    const databaseRecordKey = params.databaseRecordKey;
+    const tableRecordKey = params.tableRecordKey;
+    if (params.id) {
+        
+        const id = params.id;
+        console.log('id:  ',id)
+    }
     
-    // Get the keys for the table and database being used.
-    const tableRecordKey = Number(searchParams.get('tableRecordKey'));
-    const databaseRecordKey = Number(searchParams.get('databaseRecordKey'));
     
     // Get the data for the table and database being used.
     const tableRecord = await dexieDatabaseRegistry.tableRegistry.get(tableRecordKey);
@@ -305,29 +353,31 @@ async function handleRecord() {
     // Get all fields for the table.
     let fieldRegistry = await dexieDatabaseRegistry.fieldRegistry.where("tableRecordKey").equals(tableRecordKey).sortBy('fieldAlias');
     let fieldList = fieldRegistry.map(({ fieldName }) => fieldName);
+    if (params.id) {
+        fieldList.unshift("id");
+    }
     let fieldListString = fieldList.join(','); 
     consoleCustomLog("fieldRegistry:  ",fieldRegistry);
 
+
+
     // Open the database.
-    let db = new Dexie(databaseRecord.databaseName);
-    db.version(1).stores({
+    let workingDB = new Dexie(databaseRecord.databaseName);
+    workingDB.version(1).stores({
         [tableRecord.tableName]: fieldListString
     });
-    consoleCustomLog("db:  ",db);
+    consoleCustomLog("workingDB:  ",workingDB);
 
     // If the id parameter exists, then this is an update.  Get the data to populate the form.
     let dataRecord = [];
-    if (searchParams.get('id')) {
+    if (params.id) {
         
         // Get the data that will be updated.
-        dataRecord = await db[tableRecord.tableName].where("id").equals(Number(searchParams.get('id'))).toArray();
+        dataRecord = await workingDB[tableRecord.tableName].where("id").equals(Number(params.id)).toArray();
         consoleCustomLog (
-            "\ntableRecord.tableName:  ",
-            tableRecord.tableName,
-            "\nid:  ",
-            searchParams.get('id'),
-            "\ndataRecord:  ",
-            dataRecord);
+            "\ntableRecord.tableName:  ",tableRecord.tableName,
+            "\nid:  ", params.id,
+            "\ndataRecord:  ",dataRecord);
 
         // Prepend the id field.
         fieldRegistry.unshift({"fieldName":"id","fieldAlias":"id"})
@@ -359,6 +409,8 @@ async function handleRecord() {
 
             formContainer.append(element);
     })
+
+    workingDB.close();
 }
 
 export function initHTMXHandler () {

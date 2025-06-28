@@ -436,10 +436,6 @@ async function handleSaveRecord (event, actionElement) {
     const tableRecord = await dexieDatabaseRegistry.tableRegistry.get(tableRecordKey);
     const databaseRecord = await dexieDatabaseRegistry.databaseRegistry.get(databaseRecordKey);
 
-    // Remove id if it's in the list so that ++id is in the list.
-    //const fieldsArray = Object.keys(formDataObject).filter(f => f !== 'id');
-    //const fieldsList = "++id,"+fieldsArray.join(",");
-
     const fields = await dexieDatabaseRegistry.fieldRegistry
         .where("tableRecordKey")
         .equals(tableRecordKey)
@@ -456,23 +452,19 @@ async function handleSaveRecord (event, actionElement) {
     //db.version(1).stores({
     //    [tableRecord.tableName] : fieldsList
     //});
-console.log("close");
-let db = new Dexie(databaseRecord.databaseName);
-console.log("1")
-db.close(); // ensure no lingering connections
-console.log("2")
-db.version(1).stores({
-    [tableRecord.tableName]: fieldsList
-});
-console.log("3:  ", fieldsList)
-await db.open();
-console.log("Open");
+
+    let workingDB = new Dexie(databaseRecord.databaseName);
+    workingDB.version(version).stores({
+        [tableRecord.tableName]: fieldsList
+    });    
+    await workingDB.open();
+
 
     // Get the primary key name.
-    const primaryKey = db[tableRecord.tableName].schema.primKey.name;
+    const primaryKey = workingDB[tableRecord.tableName].schema.primKey.name;
 
     // Get the table that will be updated.
-    let table = db[tableRecord.tableName];
+    let table = workingDB[tableRecord.tableName];
     
     // If formDataObject has a key, then it is an update.  Else, it is an insert.
     let hasKey = Object.keys(formDataObject).includes(primaryKey); 
@@ -501,23 +493,23 @@ console.log("Open");
 
         const updated = await table.update(primaryKeyValue, formDataObject);
         
-        consoleCustomLog(`Record with key ${primaryKey}:${primaryKeyValue} updated in the table ${tableRecord.tableAlias}.`);
+        consoleCustomLog(
+            `\nRecord with key ${primaryKey}:${primaryKeyValue} updated in the table ${tableRecord.tableAlias}.`,
+            '\nupdated:  ',updated);
     } else {
 
         // Insert without specifying key (auto-increment assumed).
-
         const newKey = await table.add(formDataObject);
-        //const newKey = await table.add({...formDataObject});
-
-        //db.close();
         
         consoleCustomLog(`\nRecord inserted in to the table ${table} with generated key ${newKey}.`);
     }
 
+    // Close the database.
+    workingDB.close();
+
     closeModal(document.getElementById("universalModal"));
     htmx.ajax("GET",`./fragments/hxViewData.html?tableRecordKey=${tableRecordKey}`,"#mainContent");
 }
-
 
 async function handleDeleteRecord(event, actionElement) {
    
@@ -530,7 +522,6 @@ async function handleDeleteRecord(event, actionElement) {
         const key = Number(actionElement.dataset.key);
 
         let urlParams = new URLSearchParams(window.location.search);
-        let databaseRecordKey = Number(urlParams.get('databaseRecordKey')); 
         let tableRecordKey = Number(urlParams.get("tableRecordKey"));
 
         // Get the data for the table and database being used.
@@ -571,7 +562,8 @@ window.createTableFromJSON = async function (data,databaseRecordKey,tableRecordK
         .fieldRegistry
         .where("tableRecordKey")
         .equals(tableRecordKey)
-        .sortBy('fieldAlias');
+        .toArray();
+
     let fieldNameList = fieldRegistry.map(({ fieldName }) => fieldName);
     fieldNameList.unshift('id');
     let fieldAliasList = fieldRegistry.map(({ fieldAlias }) => fieldAlias);

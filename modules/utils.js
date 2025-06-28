@@ -15,7 +15,8 @@ export function getParams() {
     const result = {
         databaseRecordKey: null,
         tableRecordKey: null,
-        fieldRecordKey: null
+        fieldRecordKey: null,
+        id: null
     };
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -30,6 +31,10 @@ export function getParams() {
 
     if (urlParams.get("fieldRecordKey")) {
         result.fieldRecordKey = Number(urlParams.get("fieldRecordKey"));
+    }
+
+    if (urlParams.get("id")) {
+        result.id = Number(urlParams.get("id"));
     }
 
     return result;
