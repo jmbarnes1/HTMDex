@@ -1,4 +1,4 @@
-import { getParams } from "./utils.js";
+import { getParams, createIcon, createSpan } from "./utils.js";
 
 async function handleDatabases() {
 
@@ -30,50 +30,49 @@ async function handleDatabases() {
         // List item to hold database information.
         const databaseListItem = document.createElement("li");
 
-        const databaseNameSpan = document.createElement("span");
-        databaseNameSpan.setAttribute("hx-get", "./fragments/hxTables.html");
-        databaseNameSpan.setAttribute("hx-target", "#mainContent");
-        databaseNameSpan.setAttribute("hx-swap", "innerHTML");
-        databaseNameSpan.setAttribute("hx-trigger", "click");
-        databaseNameSpan.setAttribute("hx-push-url",`index.html?databaseRecordKey=${databaseDocument.id}`);
-        databaseNameSpan.classList.add("pointer");
+        // Create a container to hold the database info.
+        const databaseNameSpan = createSpan({
+            "hx-get" : "./fragments/hxTables.html",
+            "hx-target" : "#mainContent",
+            "hx-swap" : "innerHTML",
+            "hx-trigger" : "click",
+            "hx-push-url" : `index.html?databaseRecordKey=${databaseDocument.id}`},
+            ["pointer"]);
         databaseNameSpan.textContent = databaseDocument.databaseAlias;
 
-        const dbIcon = document.createElement("i");
-        dbIcon.classList.add("m-1","bx","bx-data");
+        const dbIcon = createIcon({},["m-1","bx","bx-data"]);
 
-        const trashIcon = document.createElement("i");
-        trashIcon.classList.add("m-1","float-end","pointer","bx","bx-trash");
-        trashIcon.setAttribute("data-action", "deleteDatabase");
-        trashIcon.setAttribute("data-database", databaseDocument.databaseName);
-        trashIcon.setAttribute("data-databaserecordkey", databaseDocument.id);
+        const trashIcon = createIcon({
+            "data-action" : "deleteDatabase",
+            "data-database" : databaseDocument.databaseName,
+            "data-databaserecordkey" : databaseDocument.id},
+            ["m-1","float-end","pointer","bx","bx-trash"]);
 
-        const pencilIcon = document.createElement("i");
-        pencilIcon.classList.add("m-1","float-end","pointer","bx","bx-edit");
-        pencilIcon.setAttribute("data-database", databaseDocument.databaseName);
-        pencilIcon.setAttribute("data-databaseRecordKey", databaseDocument.id);
-
-        pencilIcon.setAttribute("data-target","universalModal");                       
-        pencilIcon.setAttribute("data-title","RENAME DATABASE");
-        pencilIcon.setAttribute("data-buttonaction","renameDatabase");
-        pencilIcon.setAttribute("data-caption","RENAME");
-        pencilIcon.setAttribute("hx-target","#modalContent"); 
-        pencilIcon.setAttribute("hx-trigger","click"); 
-        pencilIcon.setAttribute("hx-get",`fragments/hxProfile.html?database=${databaseDocument.databaseName}&databaseRecordKey=${databaseDocument.id}`); 
-        pencilIcon.setAttribute("hx-swap","innerHTML");
-        pencilIcon.setAttribute("hx-push-url",`index.html?database=${databaseDocument.databaseName}&databaseRecordKey=${databaseDocument.id}`);
-
+        const pencilIcon = createIcon({
+            "data-database" : databaseDocument.databaseName,
+            "data-databaseRecordKey" : databaseDocument.id,
+            "data-target" : "universalModal",        
+            "data-title" : "RENAME DATABASE",
+            "data-buttonaction" : "renameDatabase",
+            "data-caption" : "RENAME",
+            "hx-target" : "#modalContent", 
+            "hx-trigger" : "click",
+            "hx-get" : `fragments/hxProfile.html?database=${databaseDocument.databaseName}&databaseRecordKey=${databaseDocument.id}`,
+            "hx-swap" : "innerHTML",
+            "hx-push-url" : `index.html?database=${databaseDocument.databaseName}&databaseRecordKey=${databaseDocument.id}`
+            },
+            ["m-1","float-end","pointer","bx","bx-edit"]);
         pencilIcon.setAttribute("onclick","toggleModal(event)");
-
+        
+        // Put the list item together.
         databaseListItem.prepend(dbIcon);
-
         databaseListItem.append(databaseNameSpan);
         databaseListItem.append(trashIcon);
         databaseListItem.append(pencilIcon);
 
-        
         databaseList.append(databaseListItem);
         
+        // Make sure HTMX works with the new items.
         htmx.process(pencilIcon);
         htmx.process(databaseListItem);
     });
@@ -108,7 +107,7 @@ async function handleTables()
     // Display the name of the database.
     document.getElementById("holdDatabaseAlias").textContent = databaseAlias;
 
-    console.log(tableRegistry.length)
+    // If there aren't any tables, display a warning note.
     if (tableRegistry.length === 0) {
         
         const tablesList = document.getElementById("tablesList");
@@ -128,40 +127,44 @@ async function handleTables()
         // List item to hold table information.
         const tableListItem = document.createElement("li");
 
-        const tableNameSpan = document.createElement("span");
-        tableNameSpan.setAttribute("hx-get", "./fragments/hxViewData.html");
-        tableNameSpan.setAttribute("hx-target", "#mainContent");
-        tableNameSpan.setAttribute("hx-swap", "innerHTML");
-        tableNameSpan.setAttribute("hx-trigger", "click");
-        tableNameSpan.setAttribute("hx-on::before-request", `selectedDatabase="${databaseAlias}"`);
-        tableNameSpan.setAttribute("hx-push-url",`index.html?databaseRecordKey=${databaseRecordKey}&tableRecordKey=${table.id}`);
-        tableNameSpan.classList.add("pointer");
+        // Create a container to hold the database info.
+        const tableNameSpan = createSpan({
+            "hx-get" : "./fragments/hxViewData.html",
+            "hx-target" : "#mainContent",
+            "hx-swap" : "innerHTML",
+            "hx-trigger" : "click",
+            "hx-on::before-request" : `selectedDatabase="${databaseAlias}"`,
+            "hx-push-url" : `index.html?databaseRecordKey=${databaseRecordKey}&tableRecordKey=${table.id}`},
+            ["pointer"]);
         tableNameSpan.textContent = table.tableAlias;
 
-        const tableIcon = document.createElement("i");
-        tableIcon.classList.add("m-1","bx","bx-table");
+        // Table Icon
+        const tableIcon = createIcon({},["m-1","bx","bx-table"]);
 
-        const trashIcon = document.createElement("i");
-        trashIcon.classList.add("m-1","float-end","pointer","bx","bx-trash");
-        trashIcon.setAttribute("data-action", "deleteTable");
-        trashIcon.setAttribute("data-databaserecordkey", databaseRecordKey);
-        trashIcon.setAttribute("data-tablerecordkey", table.id);
+        // Icon for deleting a table.
+        const trashIcon = createIcon({
+            "data-action" : "deleteTable",
+            "data-databaserecordkey" : databaseRecordKey,
+            "data-tablerecordkey" : table.id},
+            ["m-1","float-end","pointer","bx","bx-trash"]);
 
-        const pencilIcon = document.createElement("i");
-        pencilIcon.classList.add("m-1","float-end","pointer","bx","bx-edit");
-        pencilIcon.setAttribute("data-database", databaseAlias);
-        pencilIcon.setAttribute("data-databaserecordkey", databaseRecordKey);
-        pencilIcon.setAttribute("data-target","universalModal");                       
-        pencilIcon.setAttribute("data-title","RENAME TABLE");
-        pencilIcon.setAttribute("data-buttonaction","renameTable");
-        pencilIcon.setAttribute("data-caption","RENAME");
-        pencilIcon.setAttribute("hx-target","#modalContent"); 
-        pencilIcon.setAttribute("hx-trigger","click"); 
-        pencilIcon.setAttribute("hx-get",`fragments/hxProfile.html?databaseRecordKey=${databaseRecordKey}&tableRecordKey=${table.id}`); 
-        pencilIcon.setAttribute("hx-swap","innerHTML");
-        pencilIcon.setAttribute("hx-push-url",`index.html?databaseRecordKey=${databaseRecordKey}&tableRecordKey=${table.id}`);
+        // Icon for editing.
+        const pencilIcon = createIcon({
+            "data-database" : databaseAlias,
+            "data-databaserecordkey" : databaseRecordKey,
+            "data-target" : "universalModal",        
+            "data-title" : "RENAME TABLE",
+            "data-buttonaction" : "renameTable",
+            "data-caption" : "RENAME",
+            "hx-target" : "#modalContent", 
+            "hx-trigger" : "click",
+            "hx-get" : `fragments/hxProfile.html?databaseRecordKey=${databaseRecordKey}&tableRecordKey=${table.id}`,
+            "hx-swap" : "innerHTML",
+            "hx-push-url":`index.html?databaseRecordKey=${databaseRecordKey}&tableRecordKey=${table.id}`},
+            ["m-1","float-end","pointer","bx","bx-edit"]);
         pencilIcon.setAttribute("onclick","toggleModal(event)");
 
+        // Put the list item together.
         tableListItem.append(tableNameSpan);
         tableListItem.append(trashIcon);
         tableListItem.append(pencilIcon);
@@ -171,9 +174,9 @@ async function handleTables()
 
         tableListItem.prepend(tableIcon);
 
+        // Make sure HTMX works with the new items.
         htmx.process(pencilIcon);
         htmx.process(tableListItem);
-
     });
 }
 
@@ -183,7 +186,6 @@ async function handleFields() {
 
     // Get params from the URL.
     const params = getParams();
-    const databaseRecordKey = params.databaseRecordKey;
     const tableRecordKey = params.tableRecordKey;
  
     // Get all fields for the table.
@@ -192,7 +194,6 @@ async function handleFields() {
         .where("tableRecordKey")
         .equals(tableRecordKey)
         .toArray();
-        //.sortBy('fieldName');
 
     const tableRecord = await dexieDatabaseRegistry.tableRegistry.get(tableRecordKey);
     const tableAlias = tableRecord.tableAlias;
@@ -218,53 +219,53 @@ async function handleFields() {
         // List item to hold table information.
         const spanListItem = document.createElement("li");
 
-        // Span to hold actual attributes for HTMX.
-        const fieldNameSpan = document.createElement("span");
-        fieldNameSpan.setAttribute("hx-get", "./fragments/hxFields.html");
-        fieldNameSpan.setAttribute("hx-target", "#mainContent");
-        fieldNameSpan.setAttribute("hx-swap", "innerHTML");
-        fieldNameSpan.setAttribute("hx-trigger", "click");
-        fieldNameSpan.setAttribute("hx-push-url",`index.html?tableRecordKey=${tableRecordKey}&fieldRecordKey=${field.id}`);
-        fieldNameSpan.classList.add("pointer");
+        // Create a container to hold the database info.
+        const fieldNameSpan = createSpan({
+            "hx-get" : "./fragments/hxFields.html",
+            "hx-target" : "#mainContent",
+            "hx-swap" : "innerHTML",
+            "hx-trigger" : "click",
+            "hx-push-url" : `index.html?tableRecordKey=${tableRecordKey}&fieldRecordKey=${field.id}`},
+            ["pointer"]);
         fieldNameSpan.textContent = field.fieldAlias;
 
-        const fieldIcon = document.createElement("i");
-        fieldIcon.classList.add("m-1","bx","bx-bracket");
+        // Field icon.
+        const fieldIcon = createIcon({},["m-1","bx","bx-bracket"]);
 
         // Icon for deleting a field.
-        const trashIcon = document.createElement("i");
-        trashIcon.classList.add("m-1","float-end","pointer","bx","bx-trash");
-        trashIcon.setAttribute("data-action", "deleteField");
-        trashIcon.setAttribute("data-fieldRecordKey", field.id);
-        trashIcon.setAttribute("data-tableRecordKey", tableRecordKey);
+        const trashIcon = createIcon({
+            "data-action" : "deleteField",
+            "data-fieldRecordKey" : field.id,
+            "data-tableRecordKey" : tableRecordKey},
+            ["m-1","float-end","pointer","bx","bx-trash"]);
 
         // Icon for editing.
-        const pencilIcon = document.createElement("i");
-        pencilIcon.classList.add("m-1","float-end","pointer","bx","bx-edit");
-        pencilIcon.setAttribute("data-fieldRecordKey", field.id);
-        pencilIcon.setAttribute("data-target","universalModal");                       
-        pencilIcon.setAttribute("data-title","RENAME FIELD");
-        pencilIcon.setAttribute("data-buttonaction","renameField");
-        pencilIcon.setAttribute("data-caption","RENAME");
-        pencilIcon.setAttribute("hx-target","#modalContent"); 
-        pencilIcon.setAttribute("hx-trigger","click"); 
-        pencilIcon.setAttribute("hx-get",`fragments/hxProfile.html?tableRecordKey=${tableRecordKey}&fieldRecordKey=${field.id}`); 
-        pencilIcon.setAttribute("hx-swap","innerHTML");
-        pencilIcon.setAttribute("hx-push-url",`index.html?tableRecordKey=${tableRecordKey}&fieldRecordKey=${field.id}`);
+        const pencilIcon = createIcon({
+            "data-fieldRecordKey" : field.id,
+            "data-target" : "universalModal",        
+            "data-title" : "RENAME FIELD",
+            "data-buttonaction" : "renameField",
+            "data-caption" : "RENAME",
+            "hx-target" : "#modalContent", 
+            "hx-trigger" : "click",
+            "hx-get" : `fragments/hxProfile.html?tableRecordKey=${tableRecordKey}&fieldRecordKey=${field.id}`,
+            "hx-swap" : "innerHTML",
+            "hx-push-url":`index.html?tableRecordKey=${tableRecordKey}&fieldRecordKey=${field.id}`},
+            ["m-1","float-end","pointer","bx","bx-edit"]);
         pencilIcon.setAttribute("onclick","toggleModal(event)");
-
+        
+        // Put the list item together.
         spanListItem.append(fieldNameSpan);
         spanListItem.append(trashIcon);
         spanListItem.append(pencilIcon);
 
-        const fieldsList = document.getElementById("fieldsList");
         fieldsList.append(spanListItem);
 
         spanListItem.prepend(fieldIcon);
 
+        // Make sure HTMX works with the new items.
         htmx.process(pencilIcon);
         htmx.process(spanListItem);
-
     })
 }
 
@@ -283,6 +284,7 @@ async function handleViewData() {
     const databaseRecord = await dexieDatabaseRegistry.databaseRegistry.get(tableRecord.databaseRecordKey);
     const version = Number(tableRecord.schemaVersion || 1);
 
+    // Make sure to get a new record.
     document.getElementById("holdTableAlias").textContent = tableRecord.tableAlias;
     const newRecordButton = document.getElementById("newRecordButton");
     if (newRecordButton !== null) {
@@ -302,20 +304,23 @@ async function handleViewData() {
     );
 
     let data = [];
-    if (fieldRegistry.length != 0) {
+    if (fieldRegistry.length !== 0) {
         
         let fieldNames = fieldRegistry.map(f => f.fieldName);
         fieldNames.unshift("++id");
         const fieldListString = fieldNames.join(','); 
 
-        const workingDB = new Dexie(databaseRecord.databaseName);
-            workingDB.version(version).stores({
+        let workingDB = new Dexie(databaseRecord.databaseName);
+
+        workingDB.version(version).stores({
             [tableRecord.tableName]: fieldListString
         });
 
         await workingDB.open();
 
         data = await workingDB.table(tableRecord.tableName).toArray();
+
+        workingDB.close();
     }
 
     //Generate the table and add it to the DOM
@@ -325,10 +330,6 @@ async function handleViewData() {
     viewDataContainer.innerHTML = await createTableFromJSON(data,databaseRecordKey,tableRecordKey)
 
     htmx.process("#viewDataContainer");
-
-    if (typeof workingDB != 'undefined') {
-        workingDB.close();
-    }
 }
 
 async function handleRecord() {
@@ -337,14 +338,8 @@ async function handleRecord() {
     
     // Get params from the URL.
     const params = getParams();
-    const databaseRecordKey = params.databaseRecordKey;
     const tableRecordKey = params.tableRecordKey;
-    if (params.id) {
-        
-        const id = params.id;
-        console.log('id:  ',id)
-    }
-    
+ 
     
     // Get the data for the table and database being used.
     const tableRecord = await dexieDatabaseRegistry.tableRegistry.get(tableRecordKey);
@@ -357,16 +352,14 @@ async function handleRecord() {
         fieldList.unshift("id");
     }
     let fieldListString = fieldList.join(','); 
-    consoleCustomLog("fieldRegistry:  ",fieldRegistry);
-
-
 
     // Open the database.
     let workingDB = new Dexie(databaseRecord.databaseName);
-    workingDB.version(1).stores({
+    
+    workingDB.version(Number(tableRecord.schemaVersion)).stores({
         [tableRecord.tableName]: fieldListString
     });
-    consoleCustomLog("workingDB:  ",workingDB);
+    await workingDB.open();
 
     // If the id parameter exists, then this is an update.  Get the data to populate the form.
     let dataRecord = [];
@@ -385,8 +378,8 @@ async function handleRecord() {
 
     // Build a form to hold the data.
     const formContainer = document.getElementById("formContainer");
-    const modalButton = document.getElementById("recordForm");
-    modalButton.setAttribute("form","modalButton");
+    //const modalButton = document.getElementById("recordForm");
+    //modalButton.setAttribute("form","modalButton");
 
 
     // Loop over the field data and build a form element for each item.
@@ -433,14 +426,14 @@ export function initHTMXHandler () {
             // Handle the breadcrumb urls.
             const databasesBreadCrumb = document.getElementById("databasesBreadCrumb");
             if (databasesBreadCrumb) {
-                if (databaseRecordKey && databaseRecordKey != '') {
+                if (databaseRecordKey && databaseRecordKey !== '') {
                     databasesBreadCrumb.setAttribute("hx-push-url",`index.html?databaseRecordKey=${databaseRecordKey}`);
                 }
             }
 
             const tablesBreadCrumb = document.getElementById("tablesBreadCrumb");
-            if (databasesBreadCrumb) {
-                if ((tableRecordKey) && tableRecordKey != '') {
+            if (tablesBreadCrumb) {
+                if ((tableRecordKey) && tableRecordKey !== '') {
                     tablesBreadCrumb.setAttribute("hx-push-url",`index.html?databaseRecordKey=${databaseRecordKey}&tableRecordKey=${tableRecordKey}`);
                 }
             }
@@ -450,31 +443,17 @@ export function initHTMXHandler () {
 
         consoleCustomLog("\n\n**********\nThe fragment ", fragment.trim() ," is about to be processed by the HTMXHandler.");
 
-        switch (fragment) {
-            case 'hxDatabases.html' : 
-                await handleDatabases();
-                break;
+        const fragmentMap = {
+            'hxDatabases.html': handleDatabases,
+            'hxProfile.html': handleProfile,
+            'hxTables.html': handleTables,
+            'hxFields.html' : handleFields,
+            'hxViewData.html' : handleViewData,
+            'hxRecord.html' : handleRecord
+        };
 
-            case 'hxProfile.html' :
-                await handleProfile ();
-                break;
-            
-            case 'hxTables.html' :
-                await handleTables();
-                break;
+        const handler = fragmentMap[fragment];
+        if (handler) await handler();
 
-            case 'hxFields.html' :
-                await handleFields();
-                break;
-
-            case 'hxViewData.html' :
-                await handleViewData();
-                break;
-
-            case 'hxRecord.html' :
-                await handleRecord();
-                break;
-
-        }
     })
 };

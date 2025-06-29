@@ -447,17 +447,14 @@ async function handleSaveRecord (event, actionElement) {
     // Open the database.
     const version = Number(tableRecord.schemaVersion || 1);
 
-    //let db = await new Dexie(databaseRecord.databaseName);
-    //db.version(version).stores({
-    //db.version(1).stores({
-    //    [tableRecord.tableName] : fieldsList
-    //});
-
     let workingDB = new Dexie(databaseRecord.databaseName);
+    
     workingDB.version(version).stores({
         [tableRecord.tableName]: fieldsList
-    });    
+    });
+
     await workingDB.open();
+    
 
 
     // Get the primary key name.
@@ -528,13 +525,16 @@ async function handleDeleteRecord(event, actionElement) {
         const tableRecord = await dexieDatabaseRegistry.tableRegistry.get(tableRecordKey);
         const databaseRecord = await dexieDatabaseRegistry.databaseRegistry.get(tableRecord.databaseRecordKey);
 
+        const version = tableRecord.schemaVersion || 1;
+
         // Open the database.
-        let db = new Dexie(databaseRecord.databaseName);
-        db.version(1).stores({
+        let workingDB = new Dexie(databaseRecord.databaseName);
+        workingDB.version(version).stores({
             [tableRecord.tableName]: 'id++'
         });
 
-        await db[tableRecord.tableName].delete(key);
+        await workingDB[tableRecord.tableName].delete(key);
+        workingDB.close();
 
         htmx.ajax("GET",`./fragments/hxViewData.html?tableRecordKey=${tableRecordKey}`,"#mainContent");
     }

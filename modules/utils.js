@@ -40,7 +40,6 @@ export function getParams() {
     return result;
 }
 
-
 export async function incrementSchemaVersion(database, tableRecordKey) {
     database
         .get(tableRecordKey)
@@ -50,4 +49,22 @@ export async function incrementSchemaVersion(database, tableRecordKey) {
                 dexieDatabaseRegistry.tableRegistry.put(table);
             }
         );
+}
+
+export function createIcon(attributes = {}, classList = []) {
+    const icon = document.createElement("i");
+    icon.classList.add(...classList);
+    for (const [key, val] of Object.entries(attributes)) {
+        icon.setAttribute(key, val);
+    }
+    return icon;
+}
+
+export function createSpan(attributes = {}, classList = []) {
+    const span = document.createElement("span");
+    span.classList.add(...classList);
+    for (const [key, val] of Object.entries(attributes)) {
+        span.setAttribute(key, val);
+    }
+    return span;
 }

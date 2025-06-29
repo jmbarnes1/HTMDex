@@ -39,7 +39,7 @@ const toggleModal = (event) => {
     modalButton.innerHTML = buttonText;
 
     // Don't wipe out action. There's a timing issue with close.
-    if (buttonAction != "")  modalButton.dataset.action = buttonAction;
+    if (buttonAction !== "")  modalButton.dataset.action = buttonAction;
 
     // Perform toggle.
     modal && (modal.open ? closeModal(modal) : openModal(modal));
