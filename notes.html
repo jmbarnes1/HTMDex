@@ -34,4 +34,19 @@ for (const table of tableArray) {
 }
 
 
+function createListItem({ iconClasses, label, spanAttrs, trashAttrs, pencilAttrs }) {
+    const li = document.createElement("li");
+    const icon = createIcon({}, iconClasses);
+    const span = createSpan(spanAttrs, ["pointer"]);
+    span.textContent = label;
+    const trash = createIcon(trashAttrs, ["m-1","float-end","pointer","bx","bx-trash"]);
+    const pencil = createIcon(pencilAttrs, ["m-1","float-end","pointer","bx","bx-edit"]);
+    pencil.setAttribute("onclick", "toggleModal(event)");
+    li.prepend(icon);
+    li.append(span, trash, pencil);
+    htmx.process(pencil);
+    htmx.process(li);
+    return li;
+}
+
 </pre>

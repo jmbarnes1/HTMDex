@@ -1,4 +1,4 @@
-import { userConfirm, createLogger, getParams, incrementSchemaVersion} from "./modules/utils.js";
+import { userConfirm, createLogger, getParams, incrementSchemaVersion, createWarning} from "./modules/utils.js";
 import { initHTMXHandler } from "./modules/htmxhandler.js";
 
 // Initalize custom console logger.
@@ -17,8 +17,11 @@ await dexieDatabaseRegistry.open();
 
 
 // This will hold active instances.
-window.activeDB = null;
-window.activeTable = null;
+// Potential to open a database when it is first clicked and leave open.
+// Lots of issues and tables and fields may not even be defined.
+// So, it's backburnered for now.
+//window.activeDB = null;
+//window.activeTable = null;
 
 
 //Initialize the fragments handler.
@@ -261,7 +264,6 @@ function handleNewTable() {
 
     // Get params from URL.
     let urlParams = new URLSearchParams(window.location.search);
-    //let databaseName = urlParams.get('database'); 
     let databaseRecordKey = Number(urlParams.get('databaseRecordKey'));
 
     // Get a unique name for the table.
@@ -514,8 +516,6 @@ async function handleDeleteRecord(event, actionElement) {
 
     if (userConfirm()) {
         
-        consoleCustomLog(window.activeDB);
-        //const key = Number(actionElement.dataset.key);
         const key = Number(actionElement.dataset.key);
 
         let urlParams = new URLSearchParams(window.location.search);
@@ -554,7 +554,12 @@ window.createTableFromJSON = async function (data,databaseRecordKey,tableRecordK
     //Ensure the array is not empty.
     if (!data || data.length === 0) 
     {
+        
         return '<article class="pico-background-red-300 text-center">NO DATA!</article>';
+        // const warning = createWarning(
+        //     "NO DATA!")
+
+        // return warning.toString();
     }
 
     // Get all fields for the table.

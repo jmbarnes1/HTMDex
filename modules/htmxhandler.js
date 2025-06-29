@@ -1,5 +1,6 @@
-import { getParams, createIcon, createSpan } from "./utils.js";
+import { getParams, createIcon, createSpan, createWarning, processHTMX } from "./utils.js";
 
+// Handle the page hxDatabases.html, which is loaded by HTMX.
 async function handleDatabases() {
 
     consoleCustomLog("\n\n**********\nThe fragment hxDatabases.html has been loaded.");
@@ -11,15 +12,10 @@ async function handleDatabases() {
 
     const dbCount = await dexieDatabaseRegistry.databaseRegistry.count();
 
-    console.log("count 1:  ",dbCount);
     if (dbCount === 0) {
         
-        const warning = document.createElement("article");
-        warning.classList.add("pico-background-red-300","text-center");
-        warning.textContent = "NO DATABASES DEFINED YET!";
-        databaseList.append (
-            warning
-        );
+        const warning = createWarning("NO DATABASES DEFINED YET!")
+        databaseList.append (warning);
 
         return
     }
@@ -73,11 +69,11 @@ async function handleDatabases() {
         databaseList.append(databaseListItem);
         
         // Make sure HTMX works with the new items.
-        htmx.process(pencilIcon);
-        htmx.process(databaseListItem);
+        processHTMX(pencilIcon, databaseListItem);
     });
 }
 
+// Handle the page hxProfile.html, which is loaded by HTMX.
 async function handleProfile() { 
 
     const profileInput = document.getElementById('profileInput');
@@ -88,6 +84,7 @@ async function handleProfile() {
     }
 }
 
+// Handle the page hxTables.html, which is loaded by HTMX.
 async function handleTables() 
 {
 
@@ -107,16 +104,13 @@ async function handleTables()
     // Display the name of the database.
     document.getElementById("holdDatabaseAlias").textContent = databaseAlias;
 
+    const tablesList = document.getElementById("tablesList");
+
     // If there aren't any tables, display a warning note.
     if (tableRegistry.length === 0) {
         
-        const tablesList = document.getElementById("tablesList");
-        const warning = document.createElement("article");
-        warning.classList.add("pico-background-red-300","text-center");
-        warning.textContent = "NO TABLES DEFINED YET!";
-        tablesList.append (
-            warning
-        );
+        const warning = createWarning("NO TABLES DEFINED YET!")
+        tablesList.append (warning);
 
         return
     }
@@ -165,21 +159,19 @@ async function handleTables()
         pencilIcon.setAttribute("onclick","toggleModal(event)");
 
         // Put the list item together.
+        tableListItem.prepend(tableIcon);
         tableListItem.append(tableNameSpan);
         tableListItem.append(trashIcon);
         tableListItem.append(pencilIcon);
         
-        const tablesList = document.getElementById("tablesList");
         tablesList.append(tableListItem);
 
-        tableListItem.prepend(tableIcon);
-
         // Make sure HTMX works with the new items.
-        htmx.process(pencilIcon);
-        htmx.process(tableListItem);
+        processHTMX(pencilIcon, tableListItem);
     });
 }
 
+// Handle the page hxFields.html, which is loaded by HTMX.
 async function handleFields() {
 
     consoleCustomLog("\n\n**********\nThe fragment hxFields.html has been loaded.");
@@ -203,12 +195,8 @@ async function handleFields() {
     
     if (fieldRegistry.length === 0 ) {
         
-        const warning = document.createElement("article");
-        warning.classList.add("pico-background-red-300","text-center");
-        warning.textContent = "NO FIELDS DEFINED YET!";
-        fieldsList.append (
-            warning
-        );
+        const warning = createWarning("NO FIELDS DEFINED YET!")
+        fieldsList.append (warning);
 
         return
     }
@@ -255,20 +243,19 @@ async function handleFields() {
         pencilIcon.setAttribute("onclick","toggleModal(event)");
         
         // Put the list item together.
+        spanListItem.prepend(fieldIcon);
         spanListItem.append(fieldNameSpan);
         spanListItem.append(trashIcon);
         spanListItem.append(pencilIcon);
 
         fieldsList.append(spanListItem);
 
-        spanListItem.prepend(fieldIcon);
-
         // Make sure HTMX works with the new items.
-        htmx.process(pencilIcon);
-        htmx.process(spanListItem);
+        processHTMX(pencilIcon, spanListItem);
     })
 }
 
+// Handle the page hxViewData.html, which is loaded by HTMX.
 async function handleViewData() {
 
     consoleCustomLog("\n\n**********\nThe fragment hxViewData.html has been loaded.\n");
@@ -329,9 +316,11 @@ async function handleViewData() {
     //Display the data.
     viewDataContainer.innerHTML = await createTableFromJSON(data,databaseRecordKey,tableRecordKey)
 
-    htmx.process("#viewDataContainer");
+    // Make sure HTMX works with the new items.
+    processHTMX("#viewDataContainer");
 }
 
+// Handle the page hxRecord.html, which is loaded by HTMX.
 async function handleRecord() {
 
     consoleCustomLog("\n\n**********\nThe fragment hxRecord.html has been loaded.");
@@ -406,6 +395,7 @@ async function handleRecord() {
     workingDB.close();
 }
 
+// Initialize the handler HTMX fragment handler.
 export function initHTMXHandler () {
 
     document.body.addEventListener('htmx:afterSwap', async (e) => {
