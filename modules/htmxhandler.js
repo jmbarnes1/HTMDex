@@ -1,9 +1,10 @@
-import { getParams, createIcon, createSpan, createWarning, processHTMX } from "./utils.js";
+import { getParams, createIcon, createSpan, createWarning, processHTMX, logFunctionStart } from "./utils.js";
+
 
 // Handle the page hxDatabases.html, which is loaded by HTMX.
 async function handleDatabases() {
 
-    consoleCustomLog("\n\n**********\nThe fragment hxDatabases.html has been loaded.");
+    logFunctionStart("handleDatabases");
 
     const databaseList = document.getElementById("databaseList");
 
@@ -73,8 +74,11 @@ async function handleDatabases() {
     });
 }
 
+
 // Handle the page hxProfile.html, which is loaded by HTMX.
 async function handleProfile() { 
+
+    logFunctionStart("handleProfile");
 
     const profileInput = document.getElementById('profileInput');
     
@@ -84,11 +88,11 @@ async function handleProfile() {
     }
 }
 
+
 // Handle the page hxTables.html, which is loaded by HTMX.
 async function handleTables() 
 {
-
-    consoleCustomLog("\n\n**********\nThe fragment hxTables.html has been loaded.");
+    logFunctionStart("handleTables");
     
     // Get params from the URL.
     const params = getParams();
@@ -171,11 +175,12 @@ async function handleTables()
     });
 }
 
+
 // Handle the page hxFields.html, which is loaded by HTMX.
 async function handleFields() {
 
-    consoleCustomLog("\n\n**********\nThe fragment hxFields.html has been loaded.");
-
+    logFunctionStart("handleFields");
+    
     // Get params from the URL.
     const params = getParams();
     const tableRecordKey = params.tableRecordKey;
@@ -255,10 +260,11 @@ async function handleFields() {
     })
 }
 
+
 // Handle the page hxViewData.html, which is loaded by HTMX.
 async function handleViewData() {
 
-    consoleCustomLog("\n\n**********\nThe fragment hxViewData.html has been loaded.\n");
+    logFunctionStart("handleViewData");
 
     // Get params from the URL.
     const params = getParams();
@@ -266,7 +272,10 @@ async function handleViewData() {
     const tableRecordKey = params.tableRecordKey;
     
     // Get all fields for the table.  This is returned as an array.
-    const fieldRegistry = await dexieDatabaseRegistry.fieldRegistry.where("tableRecordKey").equals(tableRecordKey).sortBy('fieldName');
+    const fieldRegistry = await dexieDatabaseRegistry.fieldRegistry
+        .where("tableRecordKey")
+        .equals(tableRecordKey)
+        .sortBy('fieldName');
     const tableRecord = await dexieDatabaseRegistry.tableRegistry.get(tableRecordKey);
     const databaseRecord = await dexieDatabaseRegistry.databaseRegistry.get(tableRecord.databaseRecordKey);
     const version = Number(tableRecord.schemaVersion || 1);
@@ -320,22 +329,26 @@ async function handleViewData() {
     processHTMX("#viewDataContainer");
 }
 
+
 // Handle the page hxRecord.html, which is loaded by HTMX.
 async function handleRecord() {
 
-    consoleCustomLog("\n\n**********\nThe fragment hxRecord.html has been loaded.");
-    
+    logFunctionStart("handleRecord");
+
     // Get params from the URL.
     const params = getParams();
     const tableRecordKey = params.tableRecordKey;
- 
-    
+
     // Get the data for the table and database being used.
     const tableRecord = await dexieDatabaseRegistry.tableRegistry.get(tableRecordKey);
     const databaseRecord = await dexieDatabaseRegistry.databaseRegistry.get(tableRecord.databaseRecordKey);
     
     // Get all fields for the table.
-    let fieldRegistry = await dexieDatabaseRegistry.fieldRegistry.where("tableRecordKey").equals(tableRecordKey).sortBy('fieldAlias');
+    let fieldRegistry = await dexieDatabaseRegistry
+        .fieldRegistry
+        .where("tableRecordKey")
+        .equals(tableRecordKey)
+        .sortBy('fieldAlias');
     let fieldList = fieldRegistry.map(({ fieldName }) => fieldName);
     if (params.id) {
         fieldList.unshift("id");
@@ -367,9 +380,6 @@ async function handleRecord() {
 
     // Build a form to hold the data.
     const formContainer = document.getElementById("formContainer");
-    //const modalButton = document.getElementById("recordForm");
-    //modalButton.setAttribute("form","modalButton");
-
 
     // Loop over the field data and build a form element for each item.
     fieldRegistry.forEach( function (field) {
@@ -416,21 +426,18 @@ export function initHTMXHandler () {
             // Handle the breadcrumb urls.
             const databasesBreadCrumb = document.getElementById("databasesBreadCrumb");
             if (databasesBreadCrumb) {
-                if (databaseRecordKey && databaseRecordKey !== '') {
-                    databasesBreadCrumb.setAttribute("hx-push-url",`index.html?databaseRecordKey=${databaseRecordKey}`);
-                }
+                databasesBreadCrumb.setAttribute("hx-push-url",`index.html`);
             }
 
             const tablesBreadCrumb = document.getElementById("tablesBreadCrumb");
             if (tablesBreadCrumb) {
-                if ((tableRecordKey) && tableRecordKey !== '') {
-                    tablesBreadCrumb.setAttribute("hx-push-url",`index.html?databaseRecordKey=${databaseRecordKey}&tableRecordKey=${tableRecordKey}`);
-                }
+                tablesBreadCrumb.setAttribute("hx-push-url",`index.html?databaseRecordKey=${databaseRecordKey}`);
             }
             
             return
         }
 
+        // Run Javascript for fragments.
         consoleCustomLog("\n\n**********\nThe fragment ", fragment.trim() ," is about to be processed by the HTMXHandler.");
 
         const fragmentMap = {

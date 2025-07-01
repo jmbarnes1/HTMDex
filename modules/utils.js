@@ -10,6 +10,10 @@ export function createLogger(enabled = true) {
     };
 }
 
+export function logFunctionStart(name) {
+    consoleCustomLog(`\n\n**********\nThe function ${name} has been called.`);
+}
+
 // Extract values for the URL.
 export function getParams() {
 
@@ -38,20 +42,35 @@ export function getParams() {
         result.id = Number(urlParams.get("id"));
     }
 
+    if (urlParams.get("databaseName")) {
+        result.databaseName = urlParams.get("databaseName");
+    }
+
     return result;
 }
 
 // Dexie needs tight versioning.  This allows some simple automation of that.
 export async function incrementSchemaVersion(database, tableRecordKey) {
 
+    console.log("The function incrementSchemaVersion has been called for the table with tableRecordKey:  ",tableRecordKey);
+
     const table = await database.get(tableRecordKey);
     if (!table) {
         consoleCustomLog("Table not found for recordKey:", tableRecordKey);
         return;
     }
+
+    console.log("\nUpdate the schema.  It is now:  ",table.schemaVersion)
+
     table.schemaVersion = (table.schemaVersion || 1) + 1;
     await dexieDatabaseRegistry.tableRegistry.put(table);
 }
+
+
+export function formatCell (value) 
+{
+    return value !== null && value !== undefined ? value : '';
+};
 
 // Icons are created multiple times.  Simple standardization.
 export function createIcon(attributes = {}, classList = []) {

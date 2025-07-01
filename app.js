@@ -1,9 +1,8 @@
-import { userConfirm, createLogger, getParams, incrementSchemaVersion, createWarning} from "./modules/utils.js";
+import { userConfirm, createLogger, getParams, incrementSchemaVersion, createWarning, formatCell, logFunctionStart } from "./modules/utils.js";
 import { initHTMXHandler } from "./modules/htmxhandler.js";
 
 // Initalize custom console logger.
 window.consoleCustomLog = createLogger(true);
-
 
 // Open the database once.  No need to continually reopen.
 window.dexieDatabaseRegistry = new Dexie('dexieDatabaseRegistry');
@@ -12,17 +11,10 @@ dexieDatabaseRegistry.version(1).stores({
     tableRegistry: `++id, tableName, tableAlias, databaseRecordKey, date, time`,
     fieldRegistry: `++id, fieldName, fieldAlias, tableRecordKey, databaseRecordKey, data, time`
 });
-
 await dexieDatabaseRegistry.open();
 
-
-// This will hold active instances.
-// Potential to open a database when it is first clicked and leave open.
-// Lots of issues and tables and fields may not even be defined.
-// So, it's backburnered for now.
-//window.activeDB = null;
-//window.activeTable = null;
-
+//Initialize the universal modal.
+var universalModal = document.getElementById("universalModal");
 
 //Initialize the fragments handler.
 initHTMXHandler();
@@ -48,7 +40,7 @@ const handlers = {
 document.addEventListener (
     'click', 
     (event) => 
-    {
+    {   
         // Handle the modal action button.
         if (event.target.id === "modalButton") {
             
@@ -61,6 +53,10 @@ document.addEventListener (
                 {
                     handlers[action]();
                 }
+            }
+        } else if (event.target.dataset.toggle) {
+            if (event.target.dataset.toggle === "true") {
+                toggleModal(event);
             }
         } else {
             
@@ -84,7 +80,7 @@ document.addEventListener (
 
 function handleNewDatabase() {
 
-    consoleCustomLog("\n\n\n**********\n","The function handleNewDatabase was called.");
+    logFunctionStart("handleNewDatabase");
 
     // What's the name of the database?
     const databaseAlias = document.getElementById("profileInput").value;
@@ -100,11 +96,9 @@ function handleNewDatabase() {
             modalContent.innerHTML = "";
             modalButton.innerText = "CLOSE";            
             
-            const warningAlert = document.createElement("div");
-            warningAlert.classList.add("alert","alert-warning","text-center");
-            warningAlert.innerHTML = `THE DATABASE ${databaseAlias} ALREADY EXISTS`;
+            const warning = createWarning(`THE DATABASE ${databaseAlias} ALREADY EXISTS`)
 
-            modalContent.append(warningAlert);
+            modalContent.append(warning);
         } else {
 
             const currentDate = new Date();
@@ -117,23 +111,26 @@ function handleNewDatabase() {
                 date: new Date().toLocaleString(),
                 time: new Date().toLocaleTimeString()
             }).then(() => {
-                closeModal(document.getElementById("universalModal"));
+
+                //Close the modal and relocate.
+                closeModal(universalModal);
                 htmx.ajax("GET","./fragments/hxDatabases.html","#mainContent");
 
             }).catch((error) => {
-                    console.error("Error:", error);
+                    console.error("There was an error creating a new database:", error);
             })
         }
     })
 }
 
-
-
+// Deak with renaming a database.
 async function handleRenameDatabase() {
-   consoleCustomLog("\n\n**********\nThe function handleRenameDatabase has been called.");
     
-    let urlParams = new URLSearchParams(window.location.search);
-    let databaseRecordKey = Number(urlParams.get('databaseRecordKey')); 
+    logFunctionStart("handleRenameDatabase");
+    
+    // Get params from the URL.
+    const params = getParams(); 
+    const databaseRecordKey = params.databaseRecordKey; 
 
     // What's the name of the database?
     const profileInput = document.getElementById("profileInput");
@@ -141,7 +138,7 @@ async function handleRenameDatabase() {
 
     await checkDBExists(newDatabaseAlias).then( exists => {
         
-       consoleCustomLog("Rename database.  Does it exists?  ",exists);
+        consoleCustomLog("Rename database.  Does it exists?  ",exists);
 
         if (exists === true) {
             // Get modal elements.
@@ -153,11 +150,9 @@ async function handleRenameDatabase() {
             modalButton.onclick = toggleModal;
             modalButton.dataset.action = "";
             
-            const warningAlert = document.createElement("div");
-            warningAlert.classList.add("alert","alert-warning","text-center");
-            warningAlert.innerHTML = `THE DATABASE "${newDatabaseAlias}" ALREADY EXISTS`;
+            const warning = createWarning(`THE DATABASE "${newDatabaseAlias}" ALREADY EXISTS`);
 
-            modalContent.append(warningAlert);
+            modalContent.append(warning);
         } else {
 
             // Load the record with key.
@@ -174,11 +169,12 @@ async function handleRenameDatabase() {
                 }
             }).then(() => {
 
-                closeModal(document.getElementById("universalModal"));
+                //Close the modal and relocate.
+                closeModal(universalModal);
                 htmx.ajax("GET","./fragments/hxDatabases.html","#mainContent");
 
             }).catch(error => {
-                console.error("Error updating record:", error);
+                console.error("There was an error updating the following record:", error);
             });
         }
     })
@@ -187,9 +183,9 @@ async function handleRenameDatabase() {
 
 async function handleDeleteDatabase(event, actionElement) {
 
+    logFunctionStart("handleDeleteDatabase");
+    
     if (userConfirm()) {
-
-        consoleCustomLog("\n\n**********\nDelete database has been called.");
         
         // Get the database key.
         const databaseRecordKey = Number(actionElement.dataset.databaserecordkey);
@@ -254,17 +250,18 @@ async function checkDBExists(databaseAlias) {
 }
 
 
+// Deal with create a new table.  Add to registry.
 function handleNewTable() {
 
-    consoleCustomLog("\n\n**********\nThe function handleNewTable has been called.");
+    logFunctionStart("handleNewTable");
+
+    // Get params from the URL.
+    const params = getParams(); 
+    const databaseRecordKey = params.databaseRecordKey; 
 
     // What's the name of the table?
     const profileInput = document.getElementById("profileInput");
     const tableAlias = profileInput.value;
-
-    // Get params from URL.
-    let urlParams = new URLSearchParams(window.location.search);
-    let databaseRecordKey = Number(urlParams.get('databaseRecordKey'));
 
     // Get a unique name for the table.
     const currentDate = new Date();
@@ -279,61 +276,106 @@ function handleNewTable() {
         date : new Date().toLocaleString(),
         time : new Date().toLocaleTimeString()
     }).then(() => {
-        closeModal(document.getElementById("universalModal"));
-        
+
+        //Close the modal and relocate.
+        closeModal(universalModal);
         htmx.ajax("GET",`./fragments/hxTables.html?databaseRecordKey=${databaseRecordKey}`,"#mainContent");
 
     }).catch((error) => {
         console.error("Error:", error);
     })
-
-    closeModal(document.getElementById("universalModal"));
 }
 
 
+// Rename a table in the table registry.
 async function handleRenameTable() {
     
-    consoleCustomLog("\n\n**********\nThe function handleRenameTable has been called.");
+    logFunctionStart("handleRenameTable");
 
-    let urlParams = new URLSearchParams(window.location.search);
-    let databaseName = urlParams.get('database'); 
-    let databaseRecordKey = Number(urlParams.get('databaseRecordKey')); 
-    let tableRecordKey = Number(urlParams.get("tableRecordKey"));
+    const params = getParams();
+    const databaseRecordKey = params.databaseRecordKey; 
+    const tableRecordKey = params.tableRecordKey;
+    const databaseName = params.database;
 
     // Get new table name from input
     const profileInput = document.getElementById("profileInput");
     const newTableAlias = profileInput.value.trim();
 
     if (!newTableAlias) {
-        console.error("New table name cannot be empty.");
+        console.error("New table name field cannot be empty!");
         return;
     }
 
     dexieDatabaseRegistry.table('tableRegistry').update(tableRecordKey, {tableAlias: newTableAlias}).then(
         () => {
-            closeModal(document.getElementById("universalModal"));
+
+            //Close the modal and relocate.
+            closeModal(universalModal);
             htmx.ajax("GET",`./fragments/hxTables.html?database=${databaseName}&databaseRecordKey=${databaseRecordKey}`,"#mainContent");
         }
     )
 }
 
 
-function handleDeleteTable(event, actionElement) {
+// Delete a table.
+async function handleDeleteTable(event, actionElement) {
 
-    consoleCustomLog("\n\n**********\nThe function handleDeleteTable has been called.");
+    logFunctionStart("handleDeleteTable");
 
     if (userConfirm()) {
-        dexieDatabaseRegistry.table('tableRegistry').delete(Number(actionElement.dataset.tablerecordkey));
 
-        htmx.ajax("GET",`./fragments/hxTables.html?databaseRecordKey=${actionElement.dataset.databaserecordkey}`,"#mainContent");
+        const databaseRecordKey = Number(actionElement.dataset.databaserecordkey);
+        const tableRecordKey = Number(actionElement.dataset.tablerecordkey);
+        
+        const databaseRecord = await dexieDatabaseRegistry.databaseRegistry.get(databaseRecordKey);
+        const tableRecord = await dexieDatabaseRegistry.tableRegistry.get(tableRecordKey);
+
+        consoleCustomLog("\nDelete this table:  ", tableRecord.tableName);
+
+        // Get all fields for the table.
+        let fieldRegistry = await dexieDatabaseRegistry
+            .fieldRegistry
+            .where("tableRecordKey")
+            .equals(tableRecordKey)
+            .sortBy('fieldAlias');
+        
+        let fieldList = fieldRegistry.map(({ fieldName }) => fieldName);
+        fieldList.unshift("id");
+        let fieldListString = fieldList.join(','); 
+
+        let workingDB = new Dexie(databaseRecord.databaseName);
+        
+        const tableToClear = tableRecord.tableName;
+        const version = Number(tableRecord.schemaVersion || 1);
+        
+        // You can't actually delete tables with indexed.db.
+        // Open it up and clean out the data.
+        workingDB.version(version).stores({[tableToClear] : fieldListString });
+        await workingDB.open();
+        await workingDB.table(tableToClear).clear();
+
+        // Close it out.  IndexedDB and Dexie are sensitive to open connections.
+        workingDB.close();
+
+        // Get the table and fields.
+        await dexieDatabaseRegistry
+            .table('tableRegistry')
+            .delete(Number(actionElement.dataset.tablerecordkey));
+
+        await dexieDatabaseRegistry.fieldRegistry
+            .where("tableRecordKey")
+            .equals(tableRecordKey)
+            .delete();
+
+        htmx.ajax("GET",`./fragments/hxTables.html?databaseRecordKey=${databaseRecordKey}`,"#mainContent");
     }
-
 }
 
 
+// Deal with adding a new field to the field registry.
 async function handleNewField() {
 
-    consoleCustomLog("\n\n**********\nThe function handleNewField has been called.");
+    logFunctionStart("handleNewField");
 
     // What's the name of the field?
     const fieldAlias = document.getElementById("profileInput").value;
@@ -359,15 +401,17 @@ async function handleNewField() {
     
     await incrementSchemaVersion(dexieDatabaseRegistry.tableRegistry, tableRecordKey)
     
-    closeModal(document.getElementById("universalModal"));
+    //Close the modal and relocate.
+    closeModal(universalModal);
     htmx.ajax("GET",`./fragments/hxFields.html?databaseRecordKey=${databaseRecordKey}&tableRecordKey=${tableRecordKey}`,"#mainContent");
 }
 
 
+// Deal with renaming a field.
 async function handleRenameField () {
 
-    consoleCustomLog("\n\n**********\nThe function handleRenameField has been called.");
-
+    logFunctionStart("handleRenameField");
+    
     // Get params from the URL.
     const params = getParams();
 
@@ -386,30 +430,33 @@ async function handleRenameField () {
 
     await dexieDatabaseRegistry.table('fieldRegistry').update(fieldRecordKey, {fieldAlias: newFieldAlias})
     
-    closeModal(document.getElementById("universalModal"));
+    // Close the modal and relocate.
+    closeModal(universalModal);
     htmx.ajax("GET",`./fragments/hxFields.html?tableRecordKey=${tableRecordKey}`,"#mainContent");
     
 }
 
 
-async function handleDeleteField (event, actionElement) {
+// Remove a field from a table.
+async function handleDeleteField (event,actionElement) {
 
-    consoleCustomLog("\n\n**********\nThe function handleDeleteField has been called.");
+    logFunctionStart("handleDeleteField");
 
     if (userConfirm()) {
+
         dexieDatabaseRegistry.table('fieldRegistry').delete(Number(actionElement.dataset.fieldrecordkey));
 
-        await incrementSchemaVersion(dexieDatabaseRegistry.tableRegistry, tableRecordKey);
+        await incrementSchemaVersion(dexieDatabaseRegistry.tableRegistry, actionElement.dataset.tablerecordkey);
 
         htmx.ajax("GET",`./fragments/hxFields.html?tableRecordKey=${actionElement.dataset.tablerecordkey}`,"#mainContent");
     }
 }
 
 
-
+// Save a record via insert or update.
 async function handleSaveRecord (event, actionElement) {
 
-    consoleCustomLog("\n\n**********\nThe function handleSaveRecord has been called.");
+    logFunctionStart("handleSaveRecord");
 
     // Get params from the URL.
     const params = getParams();
@@ -457,8 +504,6 @@ async function handleSaveRecord (event, actionElement) {
 
     await workingDB.open();
     
-
-
     // Get the primary key name.
     const primaryKey = workingDB[tableRecord.tableName].schema.primKey.name;
 
@@ -506,20 +551,25 @@ async function handleSaveRecord (event, actionElement) {
     // Close the database.
     workingDB.close();
 
-    closeModal(document.getElementById("universalModal"));
+    //Close the modal and relocate.
+    closeModal(universalModal);
     htmx.ajax("GET",`./fragments/hxViewData.html?tableRecordKey=${tableRecordKey}`,"#mainContent");
 }
 
+
+// Delete a record from a table.
 async function handleDeleteRecord(event, actionElement) {
    
-    consoleCustomLog("\n\n**********\nThe function handleDeleteRecord has been called.");
+    logFunctionStart("handleDeleteRecord");
 
     if (userConfirm()) {
         
-        const key = Number(actionElement.dataset.key);
+        // Get params from the URL.
+        const params = getParams();
 
-        let urlParams = new URLSearchParams(window.location.search);
-        let tableRecordKey = Number(urlParams.get("tableRecordKey"));
+        let tableRecordKey = params.tableRecordKey;
+
+        const key = Number(actionElement.dataset.key);
 
         // Get the data for the table and database being used.
         const tableRecord = await dexieDatabaseRegistry.tableRegistry.get(tableRecordKey);
@@ -540,26 +590,17 @@ async function handleDeleteRecord(event, actionElement) {
     }
 }
 
-function formatCell (value) 
-{
-    return value !== null && value !== undefined ? value : '';
-};
 
 //Dynamically create a table.
 window.createTableFromJSON = async function (data,databaseRecordKey,tableRecordKey)  
 {
     
-    consoleCustomLog("\n\n**********\nThe function createTableFromJSON has been called.\n\n");
+    logFunctionStart("createTableFromJSON");
     
     //Ensure the array is not empty.
     if (!data || data.length === 0) 
     {
-        
         return '<article class="pico-background-red-300 text-center">NO DATA!</article>';
-        // const warning = createWarning(
-        //     "NO DATA!")
-
-        // return warning.toString();
     }
 
     // Get all fields for the table.
@@ -573,7 +614,7 @@ window.createTableFromJSON = async function (data,databaseRecordKey,tableRecordK
     fieldNameList.unshift('id');
     let fieldAliasList = fieldRegistry.map(({ fieldAlias }) => fieldAlias);
     fieldAliasList.unshift('id');
-
+    //onclick="toggleModal(event)"
     //Generate the table shell with dynamic headers.
     const tableHTML = `
         <table>
@@ -589,7 +630,8 @@ window.createTableFromJSON = async function (data,databaseRecordKey,tableRecordK
                         ${fieldNameList.map(fld => `<td>${formatCell(row[fld])}</td>`).join('')}
                         <td class="text-center">
                             <i class="bx bx-pencil pointer"
-                                onclick="toggleModal(event)"
+                                
+                                data-toggle="true"
                                 data-key="${row["id"]}"
                                 data-target="universalModal"
                                 data-buttonaction="saveRecord" 

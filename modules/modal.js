@@ -20,19 +20,19 @@ let visibleModal = null;
 // Toggle modal
 const toggleModal = (event) => {
     
-    event.preventDefault();
-    const modal = document.getElementById(event.currentTarget.dataset.target);
-  
+    event.preventDefault();console.log(event);
+    const modal = document.getElementById(event.target.dataset.target);
+    
     if (!modal) return;
 
     // Set the title.
-    const titleText = getDataAttribute(event.currentTarget,"title","");
+    const titleText = getDataAttribute(event.target,"title","");
     const modalTitle = document.getElementById("modalTitle");
     modalTitle.innerHTML = titleText;
 
     // Pull in the button action and text from element opening modal.
-    const buttonText = getDataAttribute(event.currentTarget,"caption","CLOSE");
-    const buttonAction = getDataAttribute(event.currentTarget,"buttonaction","");
+    const buttonText = getDataAttribute(event.target,"caption","CLOSE");
+    const buttonAction = getDataAttribute(event.target,"buttonaction","");
 
     // Set button attributes.
     const modalButton = document.getElementById("modalButton");
