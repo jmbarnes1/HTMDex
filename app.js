@@ -20,7 +20,6 @@ var universalModal = document.getElementById("universalModal");
 initHTMXHandler();
 
 
-
 // Event handlers
 const handlers = {
     newDatabase : handleNewDatabase,
