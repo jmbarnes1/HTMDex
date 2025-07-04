@@ -20,6 +20,7 @@ var universalModal = document.getElementById("universalModal");
 initHTMXHandler();
 
 
+
 // Event handlers
 const handlers = {
     newDatabase : handleNewDatabase,
@@ -357,7 +358,7 @@ async function handleDeleteTable(event, actionElement) {
         // Close it out.  IndexedDB and Dexie are sensitive to open connections.
         workingDB.close();
 
-        // Get the table and fields.
+        // Clean out table and fields.
         await dexieDatabaseRegistry
             .table('tableRegistry')
             .delete(Number(actionElement.dataset.tablerecordkey));
@@ -614,7 +615,7 @@ window.createTableFromJSON = async function (data,databaseRecordKey,tableRecordK
     fieldNameList.unshift('id');
     let fieldAliasList = fieldRegistry.map(({ fieldAlias }) => fieldAlias);
     fieldAliasList.unshift('id');
-    //onclick="toggleModal(event)"
+    
     //Generate the table shell with dynamic headers.
     const tableHTML = `
         <table>
