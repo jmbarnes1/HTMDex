@@ -19,7 +19,7 @@ let visibleModal = null;
 
 // Toggle modal
 const toggleModal = (event) => {
-    
+
     event.preventDefault();
     const modal = document.getElementById(event.target.dataset.target);
     

@@ -1,7 +1,7 @@
 import { userConfirm, createLogger, getParams, incrementSchemaVersion, createWarning, formatCell, logFunctionStart } from "./modules/utils.js";
 import { initHTMXHandler } from "./modules/htmxhandler.js";
 
-// Initalize custom console logger.
+// Initalize custom console logger.  Pass false to turn it off.
 window.consoleCustomLog = createLogger(true);
 
 // Open the database once.  No need to continually reopen.
@@ -54,11 +54,13 @@ document.addEventListener (
                     handlers[action]();
                 }
             }
-        } else if (event.target.dataset.toggle) {
-            if (event.target.dataset.toggle === "true") {
+        } else if (event.target.dataset.togglemodal) {
+            if (event.target.dataset.togglemodal === "true") {
+                console.log("toggle modal event should fire")
                 toggleModal(event);
             }
-        } else {
+        }
+        else {
             
             //Get the action if it exists.
             const actionElement = event.target.closest('[data-action]');
@@ -76,6 +78,8 @@ document.addEventListener (
         }
     }
 );
+
+
 
 
 function handleNewDatabase() {
@@ -630,10 +634,9 @@ window.createTableFromJSON = async function (data,databaseRecordKey,tableRecordK
                         ${fieldNameList.map(fld => `<td>${formatCell(row[fld])}</td>`).join('')}
                         <td class="text-center">
                             <i class="bx bx-pencil pointer"
-                                
-                                data-toggle="true"
                                 data-key="${row["id"]}"
                                 data-target="universalModal"
+                                data-togglemodal="true"
                                 data-buttonaction="saveRecord" 
                                 data-caption="SAVE"
                                 hx-target="#modalContent" 
