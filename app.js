@@ -1,4 +1,5 @@
 import { userConfirm, createLogger, getParams, incrementSchemaVersion, createWarning, formatCell, logFunctionStart } from "./modules/utils.js";
+import { toggleModal, initModalListeners } from './modules/modal.js';
 import { initHTMXHandler } from "./modules/htmxhandler.js";
 
 // Initalize custom console logger.  Pass false to turn it off.

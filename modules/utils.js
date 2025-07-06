@@ -3,6 +3,7 @@ export function userConfirm(message = 'Are you sure?') {
     return confirm(message);
 }
 
+
 // Universal log function that can be turned on and off.
 export function createLogger(enabled = true) {
     return function log(...args) {
@@ -10,9 +11,13 @@ export function createLogger(enabled = true) {
     };
 }
 
+
+// Custom function to display the same message on function load.
+// Uses the univeral log function which can be toggled.
 export function logFunctionStart(name) {
     consoleCustomLog(`\n\n**********\nThe function ${name} has been called.`);
 }
+
 
 // Extract values for the URL.
 export function getParams() {
@@ -49,6 +54,7 @@ export function getParams() {
     return result;
 }
 
+
 // Dexie needs tight versioning.  This allows some simple automation of that.
 export async function incrementSchemaVersion(database, tableRecordKey) {
 
@@ -67,10 +73,20 @@ export async function incrementSchemaVersion(database, tableRecordKey) {
 }
 
 
+// Get a data attribute or return a default value.
+export function getDataAttribute(element, attrName, defaultValue = null) {
+    return element.hasAttribute(`data-${attrName}`) 
+        ? element.getAttribute(`data-${attrName}`) 
+        : defaultValue;
+}
+
+
+// Format a cell in a table.  Used by the create table fucntion.
 export function formatCell (value) 
 {
     return value !== null && value !== undefined ? value : '';
 };
+
 
 // Icons are created multiple times.  Simple standardization.
 export function createIcon(attributes = {}, classList = []) {
@@ -83,6 +99,7 @@ export function createIcon(attributes = {}, classList = []) {
     return icon;
 }
 
+
 // Spans are created multiple times.  Simple standardization.
 export function createSpan(attributes = {}, classList = []) {
     const span = document.createElement("span");
@@ -93,7 +110,6 @@ export function createSpan(attributes = {}, classList = []) {
     
     return span;
 }
-
 
 
 // Warnings are potentially created multiple times.  Simple standardization.

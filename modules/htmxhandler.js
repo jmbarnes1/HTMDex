@@ -1,5 +1,5 @@
 import { getParams, createIcon, createSpan, createWarning, processHTMX, logFunctionStart } from "./utils.js";
-
+import { toggleModal, initModalListeners } from './modal.js';
 
 // Handle the page hxDatabases.html, which is loaded by HTMX.
 async function handleDatabases() {
@@ -48,6 +48,7 @@ async function handleDatabases() {
         const pencilIcon = createIcon({
             "data-database" : databaseDocument.databaseName,
             "data-databaseRecordKey" : databaseDocument.id,
+            "data-togglemodal":"true",
             "data-target" : "universalModal",        
             "data-title" : "RENAME DATABASE",
             "data-buttonaction" : "renameDatabase",
@@ -59,7 +60,6 @@ async function handleDatabases() {
             "hx-push-url" : `index.html?database=${databaseDocument.databaseName}&databaseRecordKey=${databaseDocument.id}`
             },
             ["m-1","float-end","pointer","bx","bx-edit"]);
-        pencilIcon.setAttribute("onclick","toggleModal(event)");
         
         // Put the list item together.
         databaseListItem.prepend(dbIcon);
@@ -150,6 +150,7 @@ async function handleTables()
         const pencilIcon = createIcon({
             "data-database" : databaseAlias,
             "data-databaserecordkey" : databaseRecordKey,
+            "data-togglemodal":"true",
             "data-target" : "universalModal",        
             "data-title" : "RENAME TABLE",
             "data-buttonaction" : "renameTable",
@@ -160,7 +161,6 @@ async function handleTables()
             "hx-swap" : "innerHTML",
             "hx-push-url":`index.html?databaseRecordKey=${databaseRecordKey}&tableRecordKey=${table.id}`},
             ["m-1","float-end","pointer","bx","bx-edit"]);
-        pencilIcon.setAttribute("onclick","toggleModal(event)");
 
         // Put the list item together.
         tableListItem.prepend(tableIcon);
@@ -235,6 +235,7 @@ async function handleFields() {
         // Icon for editing.
         const pencilIcon = createIcon({
             "data-fieldRecordKey" : field.id,
+            "data-togglemodal":"true",
             "data-target" : "universalModal",        
             "data-title" : "RENAME FIELD",
             "data-buttonaction" : "renameField",
@@ -245,7 +246,6 @@ async function handleFields() {
             "hx-swap" : "innerHTML",
             "hx-push-url":`index.html?tableRecordKey=${tableRecordKey}&fieldRecordKey=${field.id}`},
             ["m-1","float-end","pointer","bx","bx-edit"]);
-        pencilIcon.setAttribute("onclick","toggleModal(event)");
         
         // Put the list item together.
         spanListItem.prepend(fieldIcon);
