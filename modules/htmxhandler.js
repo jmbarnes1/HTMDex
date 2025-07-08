@@ -1,5 +1,5 @@
 import { getParams, createIcon, createSpan, createWarning, processHTMX, logFunctionStart } from "./utils.js";
-import { toggleModal, initModalListeners } from './modal.js';
+import { toggleModal, closeModal } from './modal.js';
 
 // Handle the page hxDatabases.html, which is loaded by HTMX.
 async function handleDatabases() {
@@ -183,6 +183,7 @@ async function handleFields() {
     
     // Get params from the URL.
     const params = getParams();
+    const databaseRecordKey = params.databaseRecordKey;
     const tableRecordKey = params.tableRecordKey;
  
     // Get all fields for the table.
@@ -218,7 +219,7 @@ async function handleFields() {
             "hx-target" : "#mainContent",
             "hx-swap" : "innerHTML",
             "hx-trigger" : "click",
-            "hx-push-url" : `index.html?tableRecordKey=${tableRecordKey}&fieldRecordKey=${field.id}`},
+            "hx-push-url" : `index.html?databaseRecordKey=${databaseRecordKey}&tableRecordKey=${tableRecordKey}&fieldRecordKey=${field.id}`},
             ["pointer"]);
         fieldNameSpan.textContent = field.fieldAlias;
 
@@ -244,7 +245,7 @@ async function handleFields() {
             "hx-trigger" : "click",
             "hx-get" : `fragments/hxProfile.html?tableRecordKey=${tableRecordKey}&fieldRecordKey=${field.id}`,
             "hx-swap" : "innerHTML",
-            "hx-push-url":`index.html?tableRecordKey=${tableRecordKey}&fieldRecordKey=${field.id}`},
+            "hx-push-url":`index.html?databaseRecordKey=${databaseRecordKey}&tableRecordKey=${tableRecordKey}&fieldRecordKey=${field.id}`},
             ["m-1","float-end","pointer","bx","bx-edit"]);
         
         // Put the list item together.
@@ -413,7 +414,6 @@ export function initHTMXHandler () {
         // Get params from the URL.
         const params = getParams();
         const databaseRecordKey = params.databaseRecordKey;
-        const tableRecordKey = params.tableRecordKey;
 
          // Get the fragment.
         let fragment = e.detail.pathInfo.requestPath.split("/").at(-1);

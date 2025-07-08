@@ -74,18 +74,3 @@ export function closeModal(modal) {
 function getScrollbarWidth() {
     return window.innerWidth - document.documentElement.clientWidth;
 }
-
-export function initModalListeners() {
-    document.addEventListener("click", (event) => {
-        if (visibleModal === null) return;
-        const modalContent = visibleModal.querySelector("article");
-        const isClickInside = modalContent.contains(event.target);
-        if (!isClickInside) closeModal(visibleModal);
-    });
-
-    document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape" && visibleModal) {
-            closeModal(visibleModal);
-        }
-    });
-}

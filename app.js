@@ -1,5 +1,5 @@
 import { userConfirm, createLogger, getParams, incrementSchemaVersion, createWarning, formatCell, logFunctionStart } from "./modules/utils.js";
-import { toggleModal, initModalListeners } from './modules/modal.js';
+import { toggleModal, closeModal } from './modules/modal.js';
 import { initHTMXHandler } from "./modules/htmxhandler.js";
 
 // Initalize custom console logger.  Pass false to turn it off.
@@ -421,6 +421,7 @@ async function handleRenameField () {
     const params = getParams();
 
     // Get database information.
+    const databaseRecordKey = params.databaseRecordKey;
     const tableRecordKey = params.tableRecordKey;
     const fieldRecordKey = params.fieldRecordKey;
 
@@ -437,7 +438,7 @@ async function handleRenameField () {
     
     // Close the modal and relocate.
     closeModal(universalModal);
-    htmx.ajax("GET",`./fragments/hxFields.html?tableRecordKey=${tableRecordKey}`,"#mainContent");
+    htmx.ajax("GET",`./fragments/hxFields.html?databaseRecordKey=${databaseRecordKey}&tableRecordKey=${tableRecordKey}`,"#mainContent");
     
 }
 
