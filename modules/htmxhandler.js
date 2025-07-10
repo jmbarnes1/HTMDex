@@ -1,6 +1,7 @@
 import { getParams, createIcon, createSpan, createWarning, processHTMX, logFunctionStart } from "./utils.js";
 import { toggleModal, closeModal } from './modal.js';
 
+
 // Handle the page hxDatabases.html, which is loaded by HTMX.
 async function handleDatabases() {
 
@@ -351,6 +352,19 @@ async function handleRecord() {
         .equals(tableRecordKey)
         .sortBy('fieldAlias');
     let fieldList = fieldRegistry.map(({ fieldName }) => fieldName);
+    
+    if (fieldList.length === 0) {
+        const warning = createWarning("NO FIELDS DEFINED YET!")
+        document.getElementById("formContainer").append (warning);
+
+        const modalButton = document.getElementById("modalButton");
+        if (modalButton) {
+            modalButton.style.display = "none";
+        }
+        return
+    }
+
+    // If the id parameter exists, then prepend it to the field list.
     if (params.id) {
         fieldList.unshift("id");
     }
@@ -405,6 +419,7 @@ async function handleRecord() {
 
     workingDB.close();
 }
+
 
 // Initialize the handler HTMX fragment handler.
 export function initHTMXHandler () {

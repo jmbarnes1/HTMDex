@@ -2,6 +2,7 @@ import { userConfirm, createLogger, getParams, incrementSchemaVersion, createWar
 import { toggleModal, closeModal } from './modules/modal.js';
 import { initHTMXHandler } from "./modules/htmxhandler.js";
 
+
 // Initalize custom console logger.  Pass false to turn it off.
 window.consoleCustomLog = createLogger(true);
 
@@ -19,7 +20,6 @@ var universalModal = document.getElementById("universalModal");
 
 //Initialize the fragments handler.
 initHTMXHandler();
-
 
 // Event handlers
 const handlers = {
@@ -81,8 +81,6 @@ document.addEventListener (
 );
 
 
-
-
 function handleNewDatabase() {
 
     logFunctionStart("handleNewDatabase");
@@ -128,7 +126,8 @@ function handleNewDatabase() {
     })
 }
 
-// Deak with renaming a database.
+
+// Deal with renaming a database.
 async function handleRenameDatabase() {
     
     logFunctionStart("handleRenameDatabase");
@@ -247,6 +246,7 @@ async function handleDeleteDatabase(event, actionElement) {
 }
 
 
+// Check if a database exists in the registry.
 async function checkDBExists(databaseAlias) {
 
     return dexieDatabaseRegistry.databaseRegistry.where("databaseAlias").equals(databaseAlias).count().then(count => {

@@ -34,11 +34,14 @@ export function toggleModal(event) {
 
     const modalButton = document.getElementById("modalButton");
     modalButton.innerHTML = buttonText;
+    modalButton.style.display="";
+    
 
     if (buttonAction !== "") modalButton.dataset.action = buttonAction;
 
     modal.open ? closeModal(modal) : openModal(modal);
 }
+
 
 export function openModal(modal) {
     const { documentElement: html } = document;
@@ -58,6 +61,7 @@ export function openModal(modal) {
     modal.showModal();
 }
 
+
 export function closeModal(modal) {
     visibleModal = null;
     const { documentElement: html } = document;
@@ -70,6 +74,7 @@ export function closeModal(modal) {
         modal.close();
     }, animationDuration);
 }
+
 
 function getScrollbarWidth() {
     return window.innerWidth - document.documentElement.clientWidth;
