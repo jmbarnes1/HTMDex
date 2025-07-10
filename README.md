@@ -1,6 +1,6 @@
 # HTMDex
 
-**HTMDex** is a lightweight, modular web application that combines the interactivity of [HTMX](https://htmx.org/) with the power of [Dexie.js](https://dexie.org/) for local storage. Styled with [PicoCSS](https://picocss.com/) and enhanced visually using [Boxicons](https://boxicons.com/), HTMDex is ideal for building modern, client-side applications with minimal setup.
+**HTMDex** is a web application that combines the interactivity of [HTMX](https://htmx.org/) with the power of [Dexie.js](https://dexie.org/) for local storage. Styled with [PicoCSS](https://picocss.com/) and [Boxicons](https://boxicons.com/), HTMDex is ideal for building modern, client-side applications with minimal setup.
 
 ##  Features
 
