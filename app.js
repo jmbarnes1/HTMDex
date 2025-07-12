@@ -57,7 +57,6 @@ document.addEventListener (
             }
         } else if (event.target.dataset.togglemodal) {
             if (event.target.dataset.togglemodal === "true") {
-                console.log("toggle modal event should fire")
                 toggleModal(event);
             }
         }
