@@ -698,6 +698,15 @@ async function handleExportCSV(event, actionElement) {
     // Get data from the table.
     const csvData = await workingDB[tableRecord.tableName].toArray();
    
+    consoleCustomLog("csvData:  ", csvData.length);
+    // If there is no data, return early.
+    if (csvData.length === 0) {
+
+        alert (`NO DATA TO EXPORT FROM THE TABLE ${tableRecord.tableAlias}`);
+        
+        return;
+    }
+
     // Close the database.
     workingDB.close();
 
