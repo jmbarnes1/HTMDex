@@ -1,6 +1,6 @@
 # HTMDex
 
-<img src="https://jmbarnes1.github.io/htmdex/icon.png" alt="HTMDex" width="200">
+<img src="https://jmbarnes1.github.io/HTMDex/icon.png" alt="HTMDex" width="200">
 *A minimalist client-side app using HTMX and Dexie.js.*
 
 ## Overview
