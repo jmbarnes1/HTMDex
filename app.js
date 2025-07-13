@@ -1,6 +1,7 @@
 import { userConfirm, createLogger, getParams, incrementSchemaVersion, createWarning, formatCell, logFunctionStart } from "./modules/utils.js";
 import { toggleModal, closeModal } from './modules/modal.js';
 import { initHTMXHandler } from "./modules/htmxhandler.js";
+import { generateCSV, downloadCSV } from "./modules/csv.js";
 
 
 // Initalize custom console logger.  Pass false to turn it off.
@@ -33,7 +34,8 @@ const handlers = {
     renameField : handleRenameField,
     deleteField : handleDeleteField,
     saveRecord : handleSaveRecord,
-    deleteRecord : handleDeleteRecord
+    deleteRecord : handleDeleteRecord,
+    exportCSV : handleExportCSV
 }
 
 // Handle actions  
@@ -656,3 +658,52 @@ window.createTableFromJSON = async function (data,databaseRecordKey,tableRecordK
 
     return tableHTML;
 };
+
+
+async function handleExportCSV(event, actionElement) {
+
+    logFunctionStart("handleExportCSV");
+
+    // Get params from the URL.
+    const params = getParams();
+    const databaseRecordKey = params.databaseRecordKey;
+    const tableRecordKey = params.tableRecordKey;
+
+    // Get the data for the table and database being used.
+    const tableRecord = await dexieDatabaseRegistry.tableRegistry.get(tableRecordKey);
+    const databaseRecord = await dexieDatabaseRegistry.databaseRegistry.get(databaseRecordKey);
+
+    // Get all fields for the table.
+    let fieldRegistry = await dexieDatabaseRegistry
+        .fieldRegistry
+        .where("tableRecordKey")
+        .equals(tableRecordKey)
+        .toArray();
+
+    // Create a list of field names and aliases.
+    let fieldNameList = fieldRegistry.map(({ fieldName }) => fieldName);
+    fieldNameList.unshift('id');
+    const fieldListString = fieldNameList.join(',');
+
+    let fieldAliasList = fieldRegistry.map(({ fieldAlias }) => fieldAlias);
+    fieldAliasList.unshift('id');
+
+    // Open the database.
+    const version = tableRecord.schemaVersion || 1;
+    let workingDB = new Dexie(databaseRecord.databaseName);
+    workingDB.version(version).stores({
+        [tableRecord.tableName]: fieldListString
+    });
+
+    // Get data from the table.
+    const csvData = await workingDB[tableRecord.tableName].toArray();
+   
+    // Close the database.
+    workingDB.close();
+
+    // Generate CSV content.
+    const csvContent = generateCSV(csvData, fieldNameList, fieldAliasList);
+
+    // Trigger download.
+    downloadCSV(csvContent, `${databaseRecord.databaseAlias}_${tableRecord.tableAlias}.csv`);
+}
