@@ -31,7 +31,7 @@ Dexie.js manages all IndexedDB interactions behind the scenes. All persistent da
 Rather than editing or renaming actual database entries, HTMDex uses **aliases**:
 
 - Each database, table, and field has a unique system ID (used internally)
-- The user-facing **alias** is what's shown in the UI and editable
+- The user-facing **alias** is what's shown in the UI and is editable
 - Changing an alias updates only the registry, not the underlying data structure
 
 This design offers:
@@ -44,7 +44,7 @@ This design offers:
 1. The user creates a new database/table/field via the UI
 2. A registry entry is created in Dexie
 3. UI components display and interact via the alias layer
-4. Updates to aliases are reflected in the UI instantly, with no change to stored records
+4. Updates to aliases are reflected in the UI, with no change to stored records
 
 
 ## Live Demo
@@ -77,15 +77,13 @@ To run LokiHTMX on your local machine, you need a simple web server. If you open
 1. Open `index.html` in your preferred web browser.
 2. Interact with the dynamic UI elements powered by HTMX and Dexie.js.
 3. Data entered is **persistently stored in IndexedDB**.
-4. Modify the project to fit your needs by editing the HTML, JS, or CSS files.
-
 
 ## License
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ## Contact
-- **GitHub Repository:** [LokiHTMX Repo](https://github.com/jmbarnes1/lokihtmx)
-- **Website:** [LokiHTMX](https://jmbarnes1.github.io/lokihtmx/)
+- **GitHub Repository:** [LokiHTMX Repo](https://github.com/jmbarnes1/htmdex)
+- **Website:** [LokiHTMX](https://jmbarnes1.github.io/htmdex/)
 
 ---
 
