@@ -49,7 +49,7 @@ This design offers:
 
 ## Live Demo
 
-[Check out the live version](https://jmbarnes1.github.io/htmdex/)
+[Check out the live version](https://jmbarnes1.github.io/HTMDex/index.html)
 
 ## Technologies Used
 
